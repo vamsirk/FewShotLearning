@@ -1,0 +1,1292 @@
+I0806 20:09:47.206667 31014 caffe.cpp:211] Use CPU.
+E0806 20:09:47.235018 31014 common.cpp:114] Cannot create Cublas handle. Cublas won't be available.
+E0806 20:09:47.254380 31014 common.cpp:121] Cannot create Curand generator. Curand won't be available.
+I0806 20:09:47.254511 31014 solver.cpp:44] Initializing solver from parameters: 
+train_net: "train_ss_os_fc.prototxt"
+base_lr: 1e-10
+display: 20
+max_iter: 1000000
+lr_policy: "step"
+gamma: 0.1
+momentum: 0.99
+weight_decay: 0.0005
+stepsize: 1000000
+snapshot: 5000
+snapshot_prefix: "../../../snapshots/ss_os_fc"
+train_state {
+  level: 0
+  stage: ""
+}
+average_loss: 1000
+iter_size: 10
+I0806 20:09:47.254621 31014 solver.cpp:77] Creating training net from train_net file: train_ss_os_fc.prototxt
+I0806 20:09:47.255352 31014 net.cpp:51] Initializing net from parameters: 
+state {
+  phase: TRAIN
+  level: 0
+  stage: ""
+}
+layer {
+  name: "first_img"
+  type: "Python"
+  top: "first_img"
+  top: "second_img"
+  top: "first_label"
+  top: "second_label"
+  python_param {
+    module: "ss_datalayer"
+    layer: "SSDatalayer"
+    param_str: "{\'profile\': \'fold1_train\', \'second_label_params\': [(\'first_label\', 1.0, 0.0)], \'first_label_params\': [(\'second_label\', 1.0, 0.0)], \'batch_size\': 1, \'k_shot\': 1, \'has_cont\': False}"
+  }
+}
+layer {
+  name: "tiled_first_label"
+  type: "Tile"
+  bottom: "first_label"
+  top: "tiled_first_label"
+  tile_param {
+    axis: 1
+    tiles: 3
+  }
+}
+layer {
+  name: "first_input"
+  type: "Scale"
+  bottom: "first_img"
+  bottom: "tiled_first_label"
+  top: "first_input"
+  scale_param {
+    axis: 0
+  }
+}
+layer {
+  name: "conv1_1f"
+  type: "Convolution"
+  bottom: "first_input"
+  top: "conv1_1f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 64
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu1_1f"
+  type: "ReLU"
+  bottom: "conv1_1f"
+  top: "conv1_1f"
+}
+layer {
+  name: "conv1_2f"
+  type: "Convolution"
+  bottom: "conv1_1f"
+  top: "conv1_2f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 64
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu1_2f"
+  type: "ReLU"
+  bottom: "conv1_2f"
+  top: "conv1_2f"
+}
+layer {
+  name: "pool1f"
+  type: "Pooling"
+  bottom: "conv1_2f"
+  top: "pool1f"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "conv2_1f"
+  type: "Convolution"
+  bottom: "pool1f"
+  top: "conv2_1f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu2_1f"
+  type: "ReLU"
+  bottom: "conv2_1f"
+  top: "conv2_1f"
+}
+layer {
+  name: "conv2_2f"
+  type: "Convolution"
+  bottom: "conv2_1f"
+  top: "conv2_2f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu2_2f"
+  type: "ReLU"
+  bottom: "conv2_2f"
+  top: "conv2_2f"
+}
+layer {
+  name: "pool2f"
+  type: "Pooling"
+  bottom: "conv2_2f"
+  top: "pool2f"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "conv3_1f"
+  type: "Convolution"
+  bottom: "pool2f"
+  top: "conv3_1f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu3_1f"
+  type: "ReLU"
+  bottom: "conv3_1f"
+  top: "conv3_1f"
+}
+layer {
+  name: "conv3_2f"
+  type: "Convolution"
+  bottom: "conv3_1f"
+  top: "conv3_2f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu3_2f"
+  type: "ReLU"
+  bottom: "conv3_2f"
+  top: "conv3_2f"
+}
+layer {
+  name: "conv3_3f"
+  type: "Convolution"
+  bottom: "conv3_2f"
+  top: "conv3_3f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu3_3f"
+  type: "ReLU"
+  bottom: "conv3_3f"
+  top: "conv3_3f"
+}
+layer {
+  name: "pool3f"
+  type: "Pooling"
+  bottom: "conv3_3f"
+  top: "pool3f"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "conv4_1f"
+  type: "Convolution"
+  bottom: "pool3f"
+  top: "conv4_1f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu4_1f"
+  type: "ReLU"
+  bottom: "conv4_1f"
+  top: "conv4_1f"
+}
+layer {
+  name: "conv4_2f"
+  type: "Convolution"
+  bottom: "conv4_1f"
+  top: "conv4_2f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu4_2f"
+  type: "ReLU"
+  bottom: "conv4_2f"
+  top: "conv4_2f"
+}
+layer {
+  name: "conv4_3f"
+  type: "Convolution"
+  bottom: "conv4_2f"
+  top: "conv4_3f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu4_3f"
+  type: "ReLU"
+  bottom: "conv4_3f"
+  top: "conv4_3f"
+}
+layer {
+  name: "pool4f"
+  type: "Pooling"
+  bottom: "conv4_3f"
+  top: "pool4f"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "conv5_1f"
+  type: "Convolution"
+  bottom: "pool4f"
+  top: "conv5_1f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu5_1f"
+  type: "ReLU"
+  bottom: "conv5_1f"
+  top: "conv5_1f"
+}
+layer {
+  name: "conv5_2f"
+  type: "Convolution"
+  bottom: "conv5_1f"
+  top: "conv5_2f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu5_2f"
+  type: "ReLU"
+  bottom: "conv5_2f"
+  top: "conv5_2f"
+}
+layer {
+  name: "conv5_3f"
+  type: "Convolution"
+  bottom: "conv5_2f"
+  top: "conv5_3f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu5_3f"
+  type: "ReLU"
+  bottom: "conv5_3f"
+  top: "conv5_3f"
+}
+layer {
+  name: "pool5f"
+  type: "Pooling"
+  bottom: "conv5_3f"
+  top: "pool5f"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "conv1_1s"
+  type: "Convolution"
+  bottom: "second_img"
+  top: "conv1_1s"
+  param {
+    name: "conv1_1_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv1_1_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 64
+    pad: 121
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu1_1s"
+  type: "ReLU"
+  bottom: "conv1_1s"
+  top: "conv1_1s"
+}
+layer {
+  name: "conv1_2s"
+  type: "Convolution"
+  bottom: "conv1_1s"
+  top: "conv1_2s"
+  param {
+    name: "conv1_2_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv1_2_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 64
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu1_2s"
+  type: "ReLU"
+  bottom: "conv1_2s"
+  top: "conv1_2s"
+}
+layer {
+  name: "pool1s"
+  type: "Pooling"
+  bottom: "conv1_2s"
+  top: "pool1s"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "conv2_1s"
+  type: "Convolution"
+  bottom: "pool1s"
+  top: "conv2_1s"
+  param {
+    name: "conv2_1_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv2_1_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu2_1s"
+  type: "ReLU"
+  bottom: "conv2_1s"
+  top: "conv2_1s"
+}
+layer {
+  name: "conv2_2s"
+  type: "Convolution"
+  bottom: "conv2_1s"
+  top: "conv2_2s"
+  param {
+    name: "conv2_2_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv2_2_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu2_2s"
+  type: "ReLU"
+  bottom: "conv2_2s"
+  top: "conv2_2s"
+}
+layer {
+  name: "pool2s"
+  type: "Pooling"
+  bottom: "conv2_2s"
+  top: "pool2s"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "conv3_1s"
+  type: "Convolution"
+  bottom: "pool2s"
+  top: "conv3_1s"
+  param {
+    name: "conv3_1_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv3_1_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu3_1s"
+  type: "ReLU"
+  bottom: "conv3_1s"
+  top: "conv3_1s"
+}
+layer {
+  name: "conv3_2s"
+  type: "Convolution"
+  bottom: "conv3_1s"
+  top: "conv3_2s"
+  param {
+    name: "conv3_2_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv3_2_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu3_2s"
+  type: "ReLU"
+  bottom: "conv3_2s"
+  top: "conv3_2s"
+}
+layer {
+  name: "conv3_3s"
+  type: "Convolution"
+  bottom: "conv3_2s"
+  top: "conv3_3s"
+  param {
+    name: "conv3_3_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv3_3_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu3_3s"
+  type: "ReLU"
+  bottom: "conv3_3s"
+  top: "conv3_3s"
+}
+layer {
+  name: "pool3s"
+  type: "Pooling"
+  bottom: "conv3_3s"
+  top: "pool3s"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "conv4_1s"
+  type: "Convolution"
+  bottom: "pool3s"
+  top: "conv4_1s"
+  param {
+    name: "conv4_1_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv4_1_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu4_1s"
+  type: "ReLU"
+  bottom: "conv4_1s"
+  top: "conv4_1s"
+}
+layer {
+  name: "conv4_2s"
+  type: "Convolution"
+  bottom: "conv4_1s"
+  top: "conv4_2s"
+  param {
+    name: "conv4_2_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv4_2_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu4_2s"
+  type: "ReLU"
+  bottom: "conv4_2s"
+  top: "conv4_2s"
+}
+layer {
+  name: "conv4_3s"
+  type: "Convolution"
+  bottom: "conv4_2s"
+  top: "conv4_3s"
+  param {
+    name: "conv4_3_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv4_3_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu4_3s"
+  type: "ReLU"
+  bottom: "conv4_3s"
+  top: "conv4_3s"
+}
+layer {
+  name: "pool4s"
+  type: "Pooling"
+  bottom: "conv4_3s"
+  top: "pool4s"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "conv5_1s"
+  type: "Convolution"
+  bottom: "pool4s"
+  top: "conv5_1s"
+  param {
+    name: "conv5_1_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv5_1_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu5_1s"
+  type: "ReLU"
+  bottom: "conv5_1s"
+  top: "conv5_1s"
+}
+layer {
+  name: "conv5_2s"
+  type: "Convolution"
+  bottom: "conv5_1s"
+  top: "conv5_2s"
+  param {
+    name: "conv5_2_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv5_2_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu5_2s"
+  type: "ReLU"
+  bottom: "conv5_2s"
+  top: "conv5_2s"
+}
+layer {
+  name: "conv5_3s"
+  type: "Convolution"
+  bottom: "conv5_2s"
+  top: "conv5_3s"
+  param {
+    name: "conv5_3_w"
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    name: "conv5_3_b"
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu5_3s"
+  type: "ReLU"
+  bottom: "conv5_3s"
+  top: "conv5_3s"
+}
+layer {
+  name: "pool5s"
+  type: "Pooling"
+  bottom: "conv5_3s"
+  top: "pool5s"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "fc6s"
+  type: "Convolution"
+  bottom: "pool5s"
+  top: "fc6s"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 4096
+    kernel_size: 7
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu6s"
+  type: "ReLU"
+  bottom: "fc6s"
+  top: "fc6s"
+}
+layer {
+  name: "fc6f"
+  type: "InnerProduct"
+  bottom: "pool5f"
+  top: "fc6f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 4096
+  }
+}
+layer {
+  name: "relu6f"
+  type: "ReLU"
+  bottom: "fc6f"
+  top: "fc6f"
+}
+layer {
+  name: "drop6f"
+  type: "Dropout"
+  bottom: "fc6f"
+  top: "fc6f"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "drop6s"
+  type: "Dropout"
+  bottom: "fc6s"
+  top: "fc6s"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc7f"
+  type: "InnerProduct"
+  bottom: "fc6f"
+  top: "fc7f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 4096
+  }
+}
+layer {
+  name: "relu7f"
+  type: "ReLU"
+  bottom: "fc7f"
+  top: "fc7f"
+}
+layer {
+  name: "fc7s"
+  type: "Convolution"
+  bottom: "fc6s"
+  top: "fc7s"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 4096
+    kernel_size: 1
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu7s"
+  type: "ReLU"
+  bottom: "fc7s"
+  top: "fc7s"
+}
+layer {
+  name: "drop7f"
+  type: "Dropout"
+  bottom: "fc7f"
+  top: "fc7f"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "drop7s"
+  type: "Dropout"
+  bottom: "fc7s"
+  top: "fc7s"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc8f"
+  type: "InnerProduct"
+  bottom: "fc7f"
+  top: "fc8f"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 1000
+  }
+}
+layer {
+  name: "rw1s"
+  type: "InnerProduct"
+  bottom: "fc8f"
+  top: "rw1s"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 4096
+  }
+}
+layer {
+  name: "rb1s"
+  type: "InnerProduct"
+  bottom: "fc8f"
+  top: "rb1s"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 1
+  }
+}
+layer {
+  name: "w1s"
+  type: "Reshape"
+  bottom: "rw1s"
+  top: "w1s"
+  reshape_param {
+    shape {
+      dim: -1
+      dim: 1
+      dim: 4096
+    }
+  }
+}
+layer {
+  name: "b1s"
+  type: "Reshape"
+  bottom: "rb1s"
+  top: "b1s"
+  reshape_param {
+    shape {
+      dim: -1
+      dim: 1
+    }
+  }
+}
+layer {
+  name: "Xs"
+  type: "Reshape"
+  bottom: "fc7s"
+  top: "Xs"
+  reshape_param {
+    shape {
+      dim: 0
+      dim: 0
+      dim: -1
+    }
+  }
+}
+layer {
+  name: "Xs_tiled"
+  type: "Tile"
+  bottom: "Xs"
+  top: "Xs_tiled"
+  tile_param {
+    axis: 0
+    tiles: 1
+  }
+}
+layer {
+  name: "w1sXs"
+  type: "MatMult"
+  bottom: "w1s"
+  bottom: "Xs_tiled"
+  top: "w1sXs"
+}
+layer {
+  name: "rpred"
+  type: "Bias"
+  bottom: "w1sXs"
+  bottom: "b1s"
+  top: "rpred"
+  bias_param {
+    axis: 0
+  }
+}
+layer {
+  name: "pred"
+  type: "ReshapeLike"
+  bottom: "rpred"
+  bottom: "fc7s"
+  top: "pred"
+  reshape_param {
+    shape {
+      dim: -1
+      dim: 1
+      dim: 0
+      dim: 0
+    }
+  }
+}
+layer {
+  name: "uppred_offset"
+  type: "Deconvolution"
+  bottom: "pred"
+  top: "uppred_offset"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 1
+    bias_term: false
+    kernel_size: 64
+    stride: 32
+  }
+}
+layer {
+  name: "pre_score"
+  type: "Crop"
+  bottom: "uppred_offset"
+  bottom: "second_img"
+  top: "pre_score"
+  crop_param {
+    axis: 2
+    offset: 40
+  }
+}
+layer {
+  name: "rpre_score"
+  type: "Reshape"
+  bottom: "pre_score"
+  top: "rpre_score"
+  reshape_param {
+    shape {
+      dim: 1
+      dim: 1
+      dim: 1
+      dim: -1
+    }
+  }
+}
+layer {
+  name: "rpre_score2"
+  type: "Pooling"
+  bottom: "rpre_score"
+  top: "rpre_score2"
+  pooling_param {
+    pool: MAX
+    kernel_h: 1
+    kernel_w: 1
+  }
+}
+layer {
+  name: "pre_score2"
+  type: "ReshapeLike"
+  bottom: "rpre_score2"
+  bottom: "second_img"
+  top: "pre_score2"
+  reshape_param {
+    shape {
+      dim: -1
+      dim: 1
+      dim: 0
+      dim: 0
+    }
+  }
+}
+layer {
+  name: "loss"
+  type: "SigmoidCrossEntropyLoss"
+  bottom: "pre_score2"
+  bottom: "second_label"
+  top: "loss"
+}
+I0806 20:09:47.255579 31014 layer_factory.hpp:77] Creating layer first_img
+I0806 20:09:47.610257 31014 net.cpp:84] Creating Layer first_img
+I0806 20:09:47.610301 31014 net.cpp:380] first_img -> first_img
+I0806 20:09:47.610327 31014 net.cpp:380] first_img -> second_img
+I0806 20:09:47.610338 31014 net.cpp:380] first_img -> first_label
+I0806 20:09:47.610347 31014 net.cpp:380] first_img -> second_label
+************************In Setup Layer ************************************
+{'profile': 'fold1_train', 'second_label_params': [('first_label', 1.0, 0.0)], 'first_label_params': [('second_label', 1.0, 0.0)], 'batch_size': 1, 'k_shot': 1, 'has_cont': False}
+************************Passed thru ************************************
+************************Running************************************
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+1
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+pascal_training
+HHHHHHHHHHHHHHHHHHHHHHHHH
+In load_anns
+[{'class_ids': [1], 'mask_name': '000', 'image_name': '000'}, {'class_ids': [1], 'mask_name': '001', 'image_name': '001'}, {'class_ids': [1], 'mask_name': '002', 'image_name': '002'}, {'class_ids': [1], 'mask_name': '003', 'image_name': '003'}, {'class_ids': [1], 'mask_name': '004', 'image_name': '004'}, {'class_ids': [1], 'mask_name': '005', 'image_name': '005'}, {'class_ids': [1], 'mask_name': '006', 'image_name': '006'}, {'class_ids': [1], 'mask_name': '007', 'image_name': '007'}, {'class_ids': [1], 'mask_name': '008', 'image_name': '008'}, {'class_ids': [1], 'mask_name': '009', 'image_name': '009'}, {'class_ids': [1], 'mask_name': '010', 'image_name': '010'}, {'class_ids': [1], 'mask_name': '011', 'image_name': '011'}, {'class_ids': [1], 'mask_name': '012', 'image_name': '012'}, {'class_ids': [1], 'mask_name': '013', 'image_name': '013'}, {'class_ids': [1], 'mask_name': '014', 'image_name': '014'}, {'class_ids': [1], 'mask_name': '015', 'image_name': '015'}, {'class_ids': [1], 'mask_name': '016', 'image_name': '016'}, {'class_ids': [1], 'mask_name': '017', 'image_name': '017'}, {'class_ids': [1], 'mask_name': '018', 'image_name': '018'}, {'class_ids': [1], 'mask_name': '019', 'image_name': '019'}, {'class_ids': [1], 'mask_name': '020', 'image_name': '020'}, {'class_ids': [1], 'mask_name': '021', 'image_name': '021'}, {'class_ids': [1], 'mask_name': '022', 'image_name': '022'}, {'class_ids': [1], 'mask_name': '023', 'image_name': '023'}, {'class_ids': [1], 'mask_name': '024', 'image_name': '024'}, {'class_ids': [1], 'mask_name': '025', 'image_name': '025'}, {'class_ids': [1], 'mask_name': '026', 'image_name': '026'}, {'class_ids': [1], 'mask_name': '027', 'image_name': '027'}, {'class_ids': [1], 'mask_name': '028', 'image_name': '028'}, {'class_ids': [1], 'mask_name': '029', 'image_name': '029'}, {'class_ids': [1], 'mask_name': '030', 'image_name': '030'}, {'class_ids': [1], 'mask_name': '031', 'image_name': '031'}, {'class_ids': [1], 'mask_name': '032', 'image_name': '032'}, {'class_ids': [1], 'mask_name': '033', 'image_name': '033'}, {'class_ids': [1], 'mask_name': '034', 'image_name': '034'}, {'class_ids': [1], 'mask_name': '035', 'image_name': '035'}, {'class_ids': [1], 'mask_name': '036', 'image_name': '036'}, {'class_ids': [1], 'mask_name': '037', 'image_name': '037'}, {'class_ids': [1], 'mask_name': '038', 'image_name': '038'}, {'class_ids': [1], 'mask_name': '039', 'image_name': '039'}, {'class_ids': [1], 'mask_name': '040', 'image_name': '040'}, {'class_ids': [1], 'mask_name': '041', 'image_name': '041'}, {'class_ids': [1], 'mask_name': '042', 'image_name': '042'}, {'class_ids': [1], 'mask_name': '043', 'image_name': '043'}, {'class_ids': [1], 'mask_name': '044', 'image_name': '044'}, {'class_ids': [1], 'mask_name': '045', 'image_name': '045'}, {'class_ids': [1], 'mask_name': '046', 'image_name': '046'}, {'class_ids': [1], 'mask_name': '047', 'image_name': '047'}, {'class_ids': [1], 'mask_name': '048', 'image_name': '048'}, {'class_ids': [1], 'mask_name': '049', 'image_name': '049'}, {'class_ids': [1], 'mask_name': '050', 'image_name': '050'}, {'class_ids': [1], 'mask_name': '051', 'image_name': '051'}, {'class_ids': [1], 'mask_name': '052', 'image_name': '052'}, {'class_ids': [1], 'mask_name': '053', 'image_name': '053'}, {'class_ids': [1], 'mask_name': '054', 'image_name': '054'}, {'class_ids': [1], 'mask_name': '055', 'image_name': '055'}, {'class_ids': [1], 'mask_name': '056', 'image_name': '056'}, {'class_ids': [1], 'mask_name': '057', 'image_name': '057'}, {'class_ids': [1], 'mask_name': '058', 'image_name': '058'}, {'class_ids': [1], 'mask_name': '059', 'image_name': '059'}, {'class_ids': [1], 'mask_name': '060', 'image_name': '060'}, {'class_ids': [1], 'mask_name': '061', 'image_name': '061'}, {'class_ids': [1], 'mask_name': '062', 'image_name': '062'}, {'class_ids': [1], 'mask_name': '063', 'image_name': '063'}, {'class_ids': [1], 'mask_name': '064', 'image_name': '064'}, {'class_ids': [1], 'mask_name': '065', 'image_name': '065'}, {'class_ids': [1], 'mask_name': '066', 'image_name': '066'}, {'class_ids': [1], 'mask_name': '067', 'image_name': '067'}, {'class_ids': [1], 'mask_name': '068', 'image_name': '068'}, {'class_ids': [1], 'mask_name': '069', 'image_name': '069'}, {'class_ids': [1], 'mask_name': '070', 'image_name': '070'}, {'class_ids': [1], 'mask_name': '071', 'image_name': '071'}, {'class_ids': [1], 'mask_name': '072', 'image_name': '072'}, {'class_ids': [1], 'mask_name': '073', 'image_name': '073'}, {'class_ids': [1], 'mask_name': '074', 'image_name': '074'}, {'class_ids': [1], 'mask_name': '075', 'image_name': '075'}, {'class_ids': [1], 'mask_name': '076', 'image_name': '076'}, {'class_ids': [1], 'mask_name': '077', 'image_name': '077'}, {'class_ids': [1], 'mask_name': '078', 'image_name': '078'}, {'class_ids': [1], 'mask_name': '079', 'image_name': '079'}, {'class_ids': [1], 'mask_name': '080', 'image_name': '080'}, {'class_ids': [1], 'mask_name': '081', 'image_name': '081'}, {'class_ids': [1], 'mask_name': '082', 'image_name': '082'}, {'class_ids': [1], 'mask_name': '083', 'image_name': '083'}, {'class_ids': [1], 'mask_name': '084', 'image_name': '084'}, {'class_ids': [1], 'mask_name': '085', 'image_name': '085'}, {'class_ids': [1], 'mask_name': '086', 'image_name': '086'}, {'class_ids': [1], 'mask_name': '087', 'image_name': '087'}, {'class_ids': [1], 'mask_name': '088', 'image_name': '088'}, {'class_ids': [1], 'mask_name': '089', 'image_name': '089'}, {'class_ids': [1], 'mask_name': '090', 'image_name': '090'}, {'class_ids': [1], 'mask_name': '091', 'image_name': '091'}, {'class_ids': [1], 'mask_name': '092', 'image_name': '092'}, {'class_ids': [1], 'mask_name': '093', 'image_name': '093'}, {'class_ids': [1], 'mask_name': '094', 'image_name': '094'}, {'class_ids': [1], 'mask_name': '095', 'image_name': '095'}, {'class_ids': [1], 'mask_name': '096', 'image_name': '096'}, {'class_ids': [1], 'mask_name': '097', 'image_name': '097'}, {'class_ids': [1], 'mask_name': '098', 'image_name': '098'}, {'class_ids': [1], 'mask_name': '099', 'image_name': '099'}, {'class_ids': [1], 'mask_name': '100', 'image_name': '100'}, {'class_ids': [1], 'mask_name': '101', 'image_name': '101'}, {'class_ids': [1], 'mask_name': '102', 'image_name': '102'}, {'class_ids': [1], 'mask_name': '103', 'image_name': '103'}, {'class_ids': [1], 'mask_name': '104', 'image_name': '104'}, {'class_ids': [1], 'mask_name': '105', 'image_name': '105'}, {'class_ids': [1], 'mask_name': '106', 'image_name': '106'}, {'class_ids': [1], 'mask_name': '107', 'image_name': '107'}, {'class_ids': [1], 'mask_name': '108', 'image_name': '108'}, {'class_ids': [1], 'mask_name': '109', 'image_name': '109'}, {'class_ids': [1], 'mask_name': '110', 'image_name': '110'}, {'class_ids': [1], 'mask_name': '111', 'image_name': '111'}, {'class_ids': [1], 'mask_name': '112', 'image_name': '112'}, {'class_ids': [1], 'mask_name': '113', 'image_name': '113'}, {'class_ids': [1], 'mask_name': '114', 'image_name': '114'}, {'class_ids': [1], 'mask_name': '115', 'image_name': '115'}, {'class_ids': [1], 'mask_name': '116', 'image_name': '116'}, {'class_ids': [1], 'mask_name': '117', 'image_name': '117'}, {'class_ids': [1], 'mask_name': '118', 'image_name': '118'}, {'class_ids': [1], 'mask_name': '119', 'image_name': '119'}, {'class_ids': [1], 'mask_name': '120', 'image_name': '120'}, {'class_ids': [1], 'mask_name': '121', 'image_name': '121'}, {'class_ids': [1], 'mask_name': '122', 'image_name': '122'}, {'class_ids': [1], 'mask_name': '123', 'image_name': '123'}, {'class_ids': [1], 'mask_name': '124', 'image_name': '124'}, {'class_ids': [1], 'mask_name': '125', 'image_name': '125'}, {'class_ids': [1], 'mask_name': '126', 'image_name': '126'}, {'class_ids': [1], 'mask_name': '127', 'image_name': '127'}, {'class_ids': [1], 'mask_name': '128', 'image_name': '128'}, {'class_ids': [1], 'mask_name': '129', 'image_name': '129'}, {'class_ids': [1], 'mask_name': '130', 'image_name': '130'}, {'class_ids': [1], 'mask_name': '131', 'image_name': '131'}, {'class_ids': [1], 'mask_name': '132', 'image_name': '132'}, {'class_ids': [1], 'mask_name': '133', 'image_name': '133'}, {'class_ids': [1], 'mask_name': '134', 'image_name': '134'}, {'class_ids': [1], 'mask_name': '135', 'image_name': '135'}, {'class_ids': [1], 'mask_name': '136', 'image_name': '136'}, {'class_ids': [1], 'mask_name': '137', 'image_name': '137'}, {'class_ids': [1], 'mask_name': '138', 'image_name': '138'}, {'class_ids': [1], 'mask_name': '139', 'image_name': '139'}, {'class_ids': [1], 'mask_name': '140', 'image_name': '140'}, {'class_ids': [1], 'mask_name': '141', 'image_name': '141'}, {'class_ids': [1], 'mask_name': '142', 'image_name': '142'}, {'class_ids': [1], 'mask_name': '143', 'image_name': '143'}, {'class_ids': [1], 'mask_name': '144', 'image_name': '144'}, {'class_ids': [1], 'mask_name': '145', 'image_name': '145'}, {'class_ids': [1], 'mask_name': '146', 'image_name': '146'}, {'class_ids': [1], 'mask_name': '147', 'image_name': '147'}, {'class_ids': [1], 'mask_name': '148', 'image_name': '148'}, {'class_ids': [1], 'mask_name': '149', 'image_name': '149'}, {'class_ids': [1], 'mask_name': '150', 'image_name': '150'}, {'class_ids': [1], 'mask_name': '151', 'image_name': '151'}, {'class_ids': [1], 'mask_name': '152', 'image_name': '152'}, {'class_ids': [1], 'mask_name': '153', 'image_name': '153'}, {'class_ids': [1], 'mask_name': '154', 'image_name': '154'}, {'class_ids': [1], 'mask_name': '155', 'image_name': '155'}, {'class_ids': [1], 'mask_name': '156', 'image_name': '156'}, {'class_ids': [1], 'mask_name': '157', 'image_name': '157'}, {'class_ids': [1], 'mask_name': '158', 'image_name': '158'}, {'class_ids': [1], 'mask_name': '159', 'image_name': '159'}, {'class_ids': [1], 'mask_name': '160', 'image_name': '160'}, {'class_ids': [1], 'mask_name': '161', 'image_name': '161'}, {'class_ids': [1], 'mask_name': '162', 'image_name': '162'}, {'class_ids': [1], 'mask_name': '163', 'image_name': '163'}, {'class_ids': [1], 'mask_name': '164', 'image_name': '164'}, {'class_ids': [1], 'mask_name': '165', 'image_name': '165'}, {'class_ids': [1], 'mask_name': '166', 'image_name': '166'}, {'class_ids': [1], 'mask_name': '167', 'image_name': '167'}, {'class_ids': [1], 'mask_name': '168', 'image_name': '168'}, {'class_ids': [1], 'mask_name': '169', 'image_name': '169'}, {'class_ids': [1], 'mask_name': '170', 'image_name': '170'}, {'class_ids': [1], 'mask_name': '171', 'image_name': '171'}, {'class_ids': [1], 'mask_name': '172', 'image_name': '172'}, {'class_ids': [1], 'mask_name': '173', 'image_name': '173'}, {'class_ids': [1], 'mask_name': '174', 'image_name': '174'}, {'class_ids': [1], 'mask_name': '175', 'image_name': '175'}, {'class_ids': [1], 'mask_name': '176', 'image_name': '176'}, {'class_ids': [1], 'mask_name': '177', 'image_name': '177'}, {'class_ids': [1], 'mask_name': '178', 'image_name': '178'}, {'class_ids': [1], 'mask_name': '179', 'image_name': '179'}, {'class_ids': [1], 'mask_name': '180', 'image_name': '180'}, {'class_ids': [1], 'mask_name': '181', 'image_name': '181'}, {'class_ids': [1], 'mask_name': '182', 'image_name': '182'}, {'class_ids': [1], 'mask_name': '183', 'image_name': '183'}, {'class_ids': [1], 'mask_name': '184', 'image_name': '184'}, {'class_ids': [1], 'mask_name': '185', 'image_name': '185'}, {'class_ids': [1], 'mask_name': '186', 'image_name': '186'}, {'class_ids': [1], 'mask_name': '187', 'image_name': '187'}, {'class_ids': [1], 'mask_name': '188', 'image_name': '188'}, {'class_ids': [1], 'mask_name': '189', 'image_name': '189'}, {'class_ids': [1], 'mask_name': '190', 'image_name': '190'}, {'class_ids': [1], 'mask_name': '191', 'image_name': '191'}, {'class_ids': [1], 'mask_name': '192', 'image_name': '192'}, {'class_ids': [1], 'mask_name': '193', 'image_name': '193'}, {'class_ids': [1], 'mask_name': '194', 'image_name': '194'}, {'class_ids': [1], 'mask_name': '195', 'image_name': '195'}, {'class_ids': [1], 'mask_name': '196', 'image_name': '196'}, {'class_ids': [1], 'mask_name': '197', 'image_name': '197'}, {'class_ids': [1], 'mask_name': '198', 'image_name': '198'}, {'class_ids': [1], 'mask_name': '199', 'image_name': '199'}, {'class_ids': [1], 'mask_name': '200', 'image_name': '200'}, {'class_ids': [1], 'mask_name': '201', 'image_name': '201'}, {'class_ids': [1], 'mask_name': '202', 'image_name': '202'}, {'class_ids': [1], 'mask_name': '203', 'image_name': '203'}, {'class_ids': [1], 'mask_name': '204', 'image_name': '204'}, {'class_ids': [1], 'mask_name': '205', 'image_name': '205'}, {'class_ids': [1], 'mask_name': '206', 'image_name': '206'}, {'class_ids': [1], 'mask_name': '207', 'image_name': '207'}, {'class_ids': [1], 'mask_name': '208', 'image_name': '208'}, {'class_ids': [1], 'mask_name': '209', 'image_name': '209'}, {'class_ids': [1], 'mask_name': '210', 'image_name': '210'}, {'class_ids': [1], 'mask_name': '211', 'image_name': '211'}, {'class_ids': [1], 'mask_name': '212', 'image_name': '212'}, {'class_ids': [1], 'mask_name': '213', 'image_name': '213'}, {'class_ids': [1], 'mask_name': '214', 'image_name': '214'}, {'class_ids': [1], 'mask_name': '215', 'image_name': '215'}, {'class_ids': [1], 'mask_name': '216', 'image_name': '216'}, {'class_ids': [1], 'mask_name': '217', 'image_name': '217'}, {'class_ids': [1], 'mask_name': '218', 'image_name': '218'}, {'class_ids': [1], 'mask_name': '219', 'image_name': '219'}, {'class_ids': [1], 'mask_name': '220', 'image_name': '220'}, {'class_ids': [1], 'mask_name': '221', 'image_name': '221'}, {'class_ids': [1], 'mask_name': '222', 'image_name': '222'}, {'class_ids': [1], 'mask_name': '223', 'image_name': '223'}, {'class_ids': [1], 'mask_name': '224', 'image_name': '224'}, {'class_ids': [1], 'mask_name': '225', 'image_name': '225'}, {'class_ids': [1], 'mask_name': '226', 'image_name': '226'}, {'class_ids': [1], 'mask_name': '227', 'image_name': '227'}, {'class_ids': [1], 'mask_name': '228', 'image_name': '228'}, {'class_ids': [1], 'mask_name': '229', 'image_name': '229'}, {'class_ids': [1], 'mask_name': '230', 'image_name': '230'}, {'class_ids': [1], 'mask_name': '231', 'image_name': '231'}, {'class_ids': [1], 'mask_name': '232', 'image_name': '232'}, {'class_ids': [1], 'mask_name': '233', 'image_name': '233'}, {'class_ids': [1], 'mask_name': '234', 'image_name': '234'}, {'class_ids': [1], 'mask_name': '235', 'image_name': '235'}, {'class_ids': [1], 'mask_name': '236', 'image_name': '236'}, {'class_ids': [1], 'mask_name': '237', 'image_name': '237'}, {'class_ids': [1], 'mask_name': '238', 'image_name': '238'}, {'class_ids': [1], 'mask_name': '239', 'image_name': '239'}, {'class_ids': [1], 'mask_name': '240', 'image_name': '240'}, {'class_ids': [1], 'mask_name': '241', 'image_name': '241'}, {'class_ids': [1], 'mask_name': '242', 'image_name': '242'}, {'class_ids': [1], 'mask_name': '243', 'image_name': '243'}, {'class_ids': [1], 'mask_name': '244', 'image_name': '244'}, {'class_ids': [1], 'mask_name': '245', 'image_name': '245'}, {'class_ids': [1], 'mask_name': '246', 'image_name': '246'}, {'class_ids': [1], 'mask_name': '247', 'image_name': '247'}, {'class_ids': [1], 'mask_name': '248', 'image_name': '248'}, {'class_ids': [1], 'mask_name': '249', 'image_name': '249'}, {'class_ids': [1], 'mask_name': '250', 'image_name': '250'}, {'class_ids': [1], 'mask_name': '251', 'image_name': '251'}, {'class_ids': [1], 'mask_name': '252', 'image_name': '252'}, {'class_ids': [1], 'mask_name': '253', 'image_name': '253'}, {'class_ids': [1], 'mask_name': '254', 'image_name': '254'}, {'class_ids': [1], 'mask_name': '255', 'image_name': '255'}, {'class_ids': [1], 'mask_name': '256', 'image_name': '256'}, {'class_ids': [1], 'mask_name': '257', 'image_name': '257'}, {'class_ids': [1], 'mask_name': '258', 'image_name': '258'}, {'class_ids': [1], 'mask_name': '259', 'image_name': '259'}, {'class_ids': [1], 'mask_name': '260', 'image_name': '260'}, {'class_ids': [1], 'mask_name': '261', 'image_name': '261'}, {'class_ids': [1], 'mask_name': '262', 'image_name': '262'}, {'class_ids': [1], 'mask_name': '263', 'image_name': '263'}, {'class_ids': [1], 'mask_name': '264', 'image_name': '264'}, {'class_ids': [1], 'mask_name': '265', 'image_name': '265'}, {'class_ids': [1], 'mask_name': '266', 'image_name': '266'}, {'class_ids': [1], 'mask_name': '267', 'image_name': '267'}, {'class_ids': [1], 'mask_name': '268', 'image_name': '268'}, {'class_ids': [1], 'mask_name': '269', 'image_name': '269'}, {'class_ids': [1], 'mask_name': '270', 'image_name': '270'}, {'class_ids': [1], 'mask_name': '271', 'image_name': '271'}, {'class_ids': [1], 'mask_name': '272', 'image_name': '272'}, {'class_ids': [1], 'mask_name': '273', 'image_name': '273'}, {'class_ids': [1], 'mask_name': '274', 'image_name': '274'}, {'class_ids': [1], 'mask_name': '275', 'image_name': '275'}, {'class_ids': [1], 'mask_name': '276', 'image_name': '276'}, {'class_ids': [1], 'mask_name': '277', 'image_name': '277'}, {'class_ids': [1], 'mask_name': '278', 'image_name': '278'}, {'class_ids': [1], 'mask_name': '279', 'image_name': '279'}, {'class_ids': [1], 'mask_name': '280', 'image_name': '280'}, {'class_ids': [1], 'mask_name': '281', 'image_name': '281'}, {'class_ids': [1], 'mask_name': '282', 'image_name': '282'}, {'class_ids': [1], 'mask_name': '283', 'image_name': '283'}, {'class_ids': [1], 'mask_name': '284', 'image_name': '284'}, {'class_ids': [1], 'mask_name': '285', 'image_name': '285'}, {'class_ids': [1], 'mask_name': '286', 'image_name': '286'}, {'class_ids': [1], 'mask_name': '287', 'image_name': '287'}, {'class_ids': [1], 'mask_name': '288', 'image_name': '288'}, {'class_ids': [1], 'mask_name': '289', 'image_name': '289'}, {'class_ids': [1], 'mask_name': '290', 'image_name': '290'}, {'class_ids': [1], 'mask_name': '291', 'image_name': '291'}, {'class_ids': [1], 'mask_name': '292', 'image_name': '292'}, {'class_ids': [1], 'mask_name': '293', 'image_name': '293'}, {'class_ids': [1], 'mask_name': '294', 'image_name': '294'}, {'class_ids': [1], 'mask_name': '295', 'image_name': '295'}, {'class_ids': [1], 'mask_name': '296', 'image_name': '296'}, {'class_ids': [1], 'mask_name': '297', 'image_name': '297'}, {'class_ids': [1], 'mask_name': '298', 'image_name': '298'}, {'class_ids': [1], 'mask_name': '299', 'image_name': '299'}, {'class_ids': [1], 'mask_name': '300', 'image_name': '300'}, {'class_ids': [1], 'mask_name': '301', 'image_name': '301'}, {'class_ids': [1], 'mask_name': '302', 'image_name': '302'}, {'class_ids': [1], 'mask_name': '303', 'image_name': '303'}, {'class_ids': [1], 'mask_name': '304', 'image_name': '304'}, {'class_ids': [1], 'mask_name': '305', 'image_name': '305'}, {'class_ids': [1], 'mask_name': '306', 'image_name': '306'}, {'class_ids': [1], 'mask_name': '307', 'image_name': '307'}, {'class_ids': [1], 'mask_name': '308', 'image_name': '308'}, {'class_ids': [1], 'mask_name': '309', 'image_name': '309'}, {'class_ids': [1], 'mask_name': '310', 'image_name': '310'}, {'class_ids': [1], 'mask_name': '311', 'image_name': '311'}, {'class_ids': [1], 'mask_name': '312', 'image_name': '312'}, {'class_ids': [1], 'mask_name': '313', 'image_name': '313'}, {'class_ids': [1], 'mask_name': '314', 'image_name': '314'}, {'class_ids': [1], 'mask_name': '315', 'image_name': '315'}, {'class_ids': [1], 'mask_name': '316', 'image_name': '316'}, {'class_ids': [1], 'mask_name': '317', 'image_name': '317'}, {'class_ids': [1], 'mask_name': '318', 'image_name': '318'}, {'class_ids': [1], 'mask_name': '319', 'image_name': '319'}, {'class_ids': [1], 'mask_name': '320', 'image_name': '320'}, {'class_ids': [1], 'mask_name': '321', 'image_name': '321'}, {'class_ids': [1], 'mask_name': '322', 'image_name': '322'}, {'class_ids': [1], 'mask_name': '323', 'image_name': '323'}, {'class_ids': [1], 'mask_name': '324', 'image_name': '324'}, {'class_ids': [1], 'mask_name': '325', 'image_name': '325'}, {'class_ids': [1], 'mask_name': '326', 'image_name': '326'}, {'class_ids': [1], 'mask_name': '327', 'image_name': '327'}, {'class_ids': [1], 'mask_name': '328', 'image_name': '328'}, {'class_ids': [1], 'mask_name': '329', 'image_name': '329'}, {'class_ids': [1], 'mask_name': '330', 'image_name': '330'}, {'class_ids': [1], 'mask_name': '331', 'image_name': '331'}, {'class_ids': [1], 'mask_name': '332', 'image_name': '332'}, {'class_ids': [1], 'mask_name': '333', 'image_name': '333'}, {'class_ids': [1], 'mask_name': '334', 'image_name': '334'}, {'class_ids': [1], 'mask_name': '335', 'image_name': '335'}, {'class_ids': [1], 'mask_name': '336', 'image_name': '336'}, {'class_ids': [1], 'mask_name': '337', 'image_name': '337'}, {'class_ids': [1], 'mask_name': '338', 'image_name': '338'}, {'class_ids': [1], 'mask_name': '339', 'image_name': '339'}, {'class_ids': [1], 'mask_name': '340', 'image_name': '340'}, {'class_ids': [1], 'mask_name': '341', 'image_name': '341'}, {'class_ids': [1], 'mask_name': '342', 'image_name': '342'}, {'class_ids': [1], 'mask_name': '343', 'image_name': '343'}, {'class_ids': [1], 'mask_name': '344', 'image_name': '344'}, {'class_ids': [1], 'mask_name': '345', 'image_name': '345'}, {'class_ids': [1], 'mask_name': '346', 'image_name': '346'}, {'class_ids': [1], 'mask_name': '347', 'image_name': '347'}, {'class_ids': [1], 'mask_name': '348', 'image_name': '348'}, {'class_ids': [1], 'mask_name': '349', 'image_name': '349'}, {'class_ids': [1], 'mask_name': '350', 'image_name': '350'}, {'class_ids': [1], 'mask_name': '351', 'image_name': '351'}, {'class_ids': [1], 'mask_name': '352', 'image_name': '352'}, {'class_ids': [1], 'mask_name': '353', 'image_name': '353'}, {'class_ids': [1], 'mask_name': '354', 'image_name': '354'}, {'class_ids': [1], 'mask_name': '355', 'image_name': '355'}, {'class_ids': [1], 'mask_name': '356', 'image_name': '356'}, {'class_ids': [1], 'mask_name': '357', 'image_name': '357'}, {'class_ids': [1], 'mask_name': '358', 'image_name': '358'}, {'class_ids': [1], 'mask_name': '359', 'image_name': '359'}, {'class_ids': [1], 'mask_name': '360', 'image_name': '360'}, {'class_ids': [1], 'mask_name': '361', 'image_name': '361'}, {'class_ids': [1], 'mask_name': '362', 'image_name': '362'}, {'class_ids': [1], 'mask_name': '363', 'image_name': '363'}, {'class_ids': [1], 'mask_name': '364', 'image_name': '364'}, {'class_ids': [1], 'mask_name': '365', 'image_name': '365'}, {'class_ids': [1], 'mask_name': '366', 'image_name': '366'}, {'class_ids': [1], 'mask_name': '367', 'image_name': '367'}, {'class_ids': [1], 'mask_name': '368', 'image_name': '368'}, {'class_ids': [1], 'mask_name': '369', 'image_name': '369'}, {'class_ids': [1], 'mask_name': '370', 'image_name': '370'}, {'class_ids': [1], 'mask_name': '371', 'image_name': '371'}, {'class_ids': [1], 'mask_name': '372', 'image_name': '372'}, {'class_ids': [1], 'mask_name': '373', 'image_name': '373'}, {'class_ids': [1], 'mask_name': '374', 'image_name': '374'}, {'class_ids': [1], 'mask_name': '375', 'image_name': '375'}, {'class_ids': [1], 'mask_name': '376', 'image_name': '376'}, {'class_ids': [1], 'mask_name': '377', 'image_name': '377'}, {'class_ids': [1], 'mask_name': '378', 'image_name': '378'}, {'class_ids': [1], 'mask_name': '379', 'image_name': '379'}, {'class_ids': [1], 'mask_name': '380', 'image_name': '380'}, {'class_ids': [1], 'mask_name': '381', 'image_name': '381'}, {'class_ids': [1], 'mask_name': '382', 'image_name': '382'}, {'class_ids': [1], 'mask_name': '383', 'image_name': '383'}, {'class_ids': [1], 'mask_name': '384', 'image_name': '384'}, {'class_ids': [1], 'mask_name': '385', 'image_name': '385'}, {'class_ids': [1], 'mask_name': '386', 'image_name': '386'}, {'class_ids': [1], 'mask_name': '387', 'image_name': '387'}, {'class_ids': [1], 'mask_name': '388', 'image_name': '388'}, {'class_ids': [1], 'mask_name': '389', 'image_name': '389'}, {'class_ids': [1], 'mask_name': '390', 'image_name': '390'}, {'class_ids': [1], 'mask_name': '391', 'image_name': '391'}, {'class_ids': [1], 'mask_name': '392', 'image_name': '392'}, {'class_ids': [1], 'mask_name': '393', 'image_name': '393'}, {'class_ids': [1], 'mask_name': '394', 'image_name': '394'}, {'class_ids': [1], 'mask_name': '395', 'image_name': '395'}, {'class_ids': [1], 'mask_name': '396', 'image_name': '396'}, {'class_ids': [1], 'mask_name': '397', 'image_name': '397'}, {'class_ids': [1], 'mask_name': '398', 'image_name': '398'}, {'class_ids': [1], 'mask_name': '399', 'image_name': '399'}, {'class_ids': [1], 'mask_name': '400', 'image_name': '400'}, {'class_ids': [1], 'mask_name': '401', 'image_name': '401'}, {'class_ids': [1], 'mask_name': '402', 'image_name': '402'}, {'class_ids': [1], 'mask_name': '403', 'image_name': '403'}, {'class_ids': [1], 'mask_name': '404', 'image_name': '404'}, {'class_ids': [1], 'mask_name': '405', 'image_name': '405'}, {'class_ids': [1], 'mask_name': '406', 'image_name': '406'}, {'class_ids': [1], 'mask_name': '407', 'image_name': '407'}, {'class_ids': [1], 'mask_name': '408', 'image_name': '408'}, {'class_ids': [1], 'mask_name': '409', 'image_name': '409'}, {'class_ids': [1], 'mask_name': '410', 'image_name': '410'}, {'class_ids': [1], 'mask_name': '411', 'image_name': '411'}, {'class_ids': [1], 'mask_name': '412', 'image_name': '412'}, {'class_ids': [1], 'mask_name': '413', 'image_name': '413'}, {'class_ids': [1], 'mask_name': '414', 'image_name': '414'}, {'class_ids': [1], 'mask_name': '415', 'image_name': '415'}, {'class_ids': [1], 'mask_name': '416', 'image_name': '416'}, {'class_ids': [1], 'mask_name': '417', 'image_name': '417'}, {'class_ids': [1], 'mask_name': '418', 'image_name': '418'}, {'class_ids': [1], 'mask_name': '419', 'image_name': '419'}, {'class_ids': [1], 'mask_name': '420', 'image_name': '420'}, {'class_ids': [1], 'mask_name': '421', 'image_name': '421'}, {'class_ids': [1], 'mask_name': '422', 'image_name': '422'}, {'class_ids': [1], 'mask_name': '423', 'image_name': '423'}, {'class_ids': [1], 'mask_name': '424', 'image_name': '424'}, {'class_ids': [1], 'mask_name': '425', 'image_name': '425'}, {'class_ids': [1], 'mask_name': '426', 'image_name': '426'}, {'class_ids': [1], 'mask_name': '427', 'image_name': '427'}, {'class_ids': [1], 'mask_name': '428', 'image_name': '428'}, {'class_ids': [1], 'mask_name': '429', 'image_name': '429'}, {'class_ids': [1], 'mask_name': '430', 'image_name': '430'}, {'class_ids': [1], 'mask_name': '431', 'image_name': '431'}, {'class_ids': [1], 'mask_name': '432', 'image_name': '432'}, {'class_ids': [1], 'mask_name': '433', 'image_name': '433'}, {'class_ids': [1], 'mask_name': '434', 'image_name': '434'}, {'class_ids': [1], 'mask_name': '435', 'image_name': '435'}, {'class_ids': [1], 'mask_name': '436', 'image_name': '436'}, {'class_ids': [1], 'mask_name': '437', 'image_name': '437'}, {'class_ids': [1], 'mask_name': '438', 'image_name': '438'}, {'class_ids': [1], 'mask_name': '439', 'image_name': '439'}, {'class_ids': [1], 'mask_name': '440', 'image_name': '440'}, {'class_ids': [1], 'mask_name': '441', 'image_name': '441'}, {'class_ids': [1], 'mask_name': '442', 'image_name': '442'}, {'class_ids': [1], 'mask_name': '443', 'image_name': '443'}, {'class_ids': [1], 'mask_name': '444', 'image_name': '444'}, {'class_ids': [1], 'mask_name': '445', 'image_name': '445'}, {'class_ids': [1], 'mask_name': '446', 'image_name': '446'}, {'class_ids': [1], 'mask_name': '447', 'image_name': '447'}, {'class_ids': [1], 'mask_name': '448', 'image_name': '448'}, {'class_ids': [1], 'mask_name': '449', 'image_name': '449'}, {'class_ids': [1], 'mask_name': '450', 'image_name': '450'}, {'class_ids': [1], 'mask_name': '451', 'image_name': '451'}, {'class_ids': [1], 'mask_name': '452', 'image_name': '452'}, {'class_ids': [1], 'mask_name': '453', 'image_name': '453'}, {'class_ids': [1], 'mask_name': '454', 'image_name': '454'}, {'class_ids': [1], 'mask_name': '455', 'image_name': '455'}, {'class_ids': [1], 'mask_name': '456', 'image_name': '456'}, {'class_ids': [1], 'mask_name': '457', 'image_name': '457'}, {'class_ids': [1], 'mask_name': '458', 'image_name': '458'}, {'class_ids': [1], 'mask_name': '459', 'image_name': '459'}, {'class_ids': [1], 'mask_name': '460', 'image_name': '460'}, {'class_ids': [1], 'mask_name': '461', 'image_name': '461'}, {'class_ids': [1], 'mask_name': '462', 'image_name': '462'}, {'class_ids': [1], 'mask_name': '463', 'image_name': '463'}, {'class_ids': [1], 'mask_name': '464', 'image_name': '464'}, {'class_ids': [1], 'mask_name': '465', 'image_name': '465'}, {'class_ids': [1], 'mask_name': '466', 'image_name': '466'}, {'class_ids': [1], 'mask_name': '467', 'image_name': '467'}, {'class_ids': [1], 'mask_name': '468', 'image_name': '468'}, {'class_ids': [1], 'mask_name': '469', 'image_name': '469'}, {'class_ids': [1], 'mask_name': '470', 'image_name': '470'}, {'class_ids': [1], 'mask_name': '471', 'image_name': '471'}, {'class_ids': [1], 'mask_name': '472', 'image_name': '472'}, {'class_ids': [1], 'mask_name': '473', 'image_name': '473'}, {'class_ids': [1], 'mask_name': '474', 'image_name': '474'}, {'class_ids': [1], 'mask_name': '475', 'image_name': '475'}, {'class_ids': [1], 'mask_name': '476', 'image_name': '476'}, {'class_ids': [1], 'mask_name': '477', 'image_name': '477'}, {'class_ids': [1], 'mask_name': '478', 'image_name': '478'}, {'class_ids': [1], 'mask_name': '479', 'image_name': '479'}, {'class_ids': [1], 'mask_name': '480', 'image_name': '480'}, {'class_ids': [1], 'mask_name': '481', 'image_name': '481'}, {'class_ids': [1], 'mask_name': '482', 'image_name': '482'}, {'class_ids': [1], 'mask_name': '483', 'image_name': '483'}, {'class_ids': [1], 'mask_name': '484', 'image_name': '484'}, {'class_ids': [1], 'mask_name': '485', 'image_name': '485'}, {'class_ids': [1], 'mask_name': '486', 'image_name': '486'}, {'class_ids': [1], 'mask_name': '487', 'image_name': '487'}, {'class_ids': [1], 'mask_name': '488', 'image_name': '488'}, {'class_ids': [1], 'mask_name': '489', 'image_name': '489'}, {'class_ids': [1], 'mask_name': '490', 'image_name': '490'}, {'class_ids': [1], 'mask_name': '491', 'image_name': '491'}, {'class_ids': [1], 'mask_name': '492', 'image_name': '492'}, {'class_ids': [1], 'mask_name': '493', 'image_name': '493'}, {'class_ids': [1], 'mask_name': '494', 'image_name': '494'}, {'class_ids': [1], 'mask_name': '495', 'image_name': '495'}, {'class_ids': [1], 'mask_name': '496', 'image_name': '496'}, {'class_ids': [1], 'mask_name': '497', 'image_name': '497'}, {'class_ids': [1], 'mask_name': '498', 'image_name': '498'}, {'class_ids': [1], 'mask_name': '499', 'image_name': '499'}, {'class_ids': [1], 'mask_name': '500', 'image_name': '500'}, {'class_ids': [1], 'mask_name': '501', 'image_name': '501'}, {'class_ids': [1], 'mask_name': '502', 'image_name': '502'}, {'class_ids': [1], 'mask_name': '503', 'image_name': '503'}, {'class_ids': [1], 'mask_name': '504', 'image_name': '504'}, {'class_ids': [1], 'mask_name': '505', 'image_name': '505'}, {'class_ids': [1], 'mask_name': '506', 'image_name': '506'}, {'class_ids': [1], 'mask_name': '507', 'image_name': '507'}, {'class_ids': [1], 'mask_name': '508', 'image_name': '508'}, {'class_ids': [1], 'mask_name': '509', 'image_name': '509'}, {'class_ids': [1], 'mask_name': '510', 'image_name': '510'}, {'class_ids': [1], 'mask_name': '511', 'image_name': '511'}, {'class_ids': [1], 'mask_name': '512', 'image_name': '512'}, {'class_ids': [1], 'mask_name': '513', 'image_name': '513'}, {'class_ids': [1], 'mask_name': '514', 'image_name': '514'}, {'class_ids': [1], 'mask_name': '515', 'image_name': '515'}, {'class_ids': [1], 'mask_name': '516', 'image_name': '516'}, {'class_ids': [1], 'mask_name': '517', 'image_name': '517'}, {'class_ids': [1], 'mask_name': '518', 'image_name': '518'}, {'class_ids': [1], 'mask_name': '519', 'image_name': '519'}, {'class_ids': [1], 'mask_name': '520', 'image_name': '520'}, {'class_ids': [1], 'mask_name': '521', 'image_name': '521'}, {'class_ids': [1], 'mask_name': '522', 'image_name': '522'}, {'class_ids': [1], 'mask_name': '523', 'image_name': '523'}, {'class_ids': [1], 'mask_name': '524', 'image_name': '524'}, {'class_ids': [1], 'mask_name': '525', 'image_name': '525'}, {'class_ids': [1], 'mask_name': '526', 'image_name': '526'}, {'class_ids': [1], 'mask_name': '527', 'image_name': '527'}, {'class_ids': [1], 'mask_name': '528', 'image_name': '528'}, {'class_ids': [1], 'mask_name': '529', 'image_name': '529'}, {'class_ids': [1], 'mask_name': '530', 'image_name': '530'}, {'class_ids': [1], 'mask_name': '531', 'image_name': '531'}, {'class_ids': [1], 'mask_name': '532', 'image_name': '532'}, {'class_ids': [1], 'mask_name': '533', 'image_name': '533'}, {'class_ids': [1], 'mask_name': '534', 'image_name': '534'}, {'class_ids': [1], 'mask_name': '535', 'image_name': '535'}, {'class_ids': [1], 'mask_name': '536', 'image_name': '536'}, {'class_ids': [1], 'mask_name': '537', 'image_name': '537'}, {'class_ids': [1], 'mask_name': '538', 'image_name': '538'}, {'class_ids': [1], 'mask_name': '539', 'image_name': '539'}, {'class_ids': [1], 'mask_name': '540', 'image_name': '540'}, {'class_ids': [1], 'mask_name': '541', 'image_name': '541'}, {'class_ids': [1], 'mask_name': '542', 'image_name': '542'}, {'class_ids': [1], 'mask_name': '543', 'image_name': '543'}, {'class_ids': [1], 'mask_name': '544', 'image_name': '544'}, {'class_ids': [1], 'mask_name': '545', 'image_name': '545'}, {'class_ids': [1], 'mask_name': '546', 'image_name': '546'}, {'class_ids': [1], 'mask_name': '547', 'image_name': '547'}, {'class_ids': [1], 'mask_name': '548', 'image_name': '548'}, {'class_ids': [1], 'mask_name': '549', 'image_name': '549'}, {'class_ids': [1], 'mask_name': '550', 'image_name': '550'}, {'class_ids': [1], 'mask_name': '551', 'image_name': '551'}, {'class_ids': [1], 'mask_name': '552', 'image_name': '552'}, {'class_ids': [1], 'mask_name': '553', 'image_name': '553'}, {'class_ids': [1], 'mask_name': '554', 'image_name': '554'}, {'class_ids': [1], 'mask_name': '555', 'image_name': '555'}, {'class_ids': [1], 'mask_name': '556', 'image_name': '556'}, {'class_ids': [1], 'mask_name': '557', 'image_name': '557'}, {'class_ids': [1], 'mask_name': '558', 'image_name': '558'}, {'class_ids': [1], 'mask_name': '559', 'image_name': '559'}, {'class_ids': [1], 'mask_name': '560', 'image_name': '560'}, {'class_ids': [1], 'mask_name': '561', 'image_name': '561'}, {'class_ids': [1], 'mask_name': '562', 'image_name': '562'}, {'class_ids': [1], 'mask_name': '563', 'image_name': '563'}, {'class_ids': [1], 'mask_name': '564', 'image_name': '564'}, {'class_ids': [1], 'mask_name': '565', 'image_name': '565'}, {'class_ids': [1], 'mask_name': '566', 'image_name': '566'}, {'class_ids': [1], 'mask_name': '567', 'image_name': '567'}, {'class_ids': [1], 'mask_name': '568', 'image_name': '568'}, {'class_ids': [1], 'mask_name': '569', 'image_name': '569'}, {'class_ids': [1], 'mask_name': '570', 'image_name': '570'}, {'class_ids': [1], 'mask_name': '571', 'image_name': '571'}, {'class_ids': [1], 'mask_name': '572', 'image_name': '572'}, {'class_ids': [1], 'mask_name': '573', 'image_name': '573'}, {'class_ids': [1], 'mask_name': '574', 'image_name': '574'}, {'class_ids': [1], 'mask_name': '575', 'image_name': '575'}, {'class_ids': [1], 'mask_name': '576', 'image_name': '576'}, {'class_ids': [1], 'mask_name': '577', 'image_name': '577'}, {'class_ids': [1], 'mask_name': '578', 'image_name': '578'}, {'class_ids': [1], 'mask_name': '579', 'image_name': '579'}, {'class_ids': [1], 'mask_name': '580', 'image_name': '580'}, {'class_ids': [1], 'mask_name': '581', 'image_name': '581'}, {'class_ids': [1], 'mask_name': '582', 'image_name': '582'}, {'class_ids': [1], 'mask_name': '583', 'image_name': '583'}, {'class_ids': [1], 'mask_name': '584', 'image_name': '584'}, {'class_ids': [1], 'mask_name': '585', 'image_name': '585'}, {'class_ids': [1], 'mask_name': '586', 'image_name': '586'}, {'class_ids': [1], 'mask_name': '587', 'image_name': '587'}, {'class_ids': [1], 'mask_name': '588', 'image_name': '588'}, {'class_ids': [1], 'mask_name': '589', 'image_name': '589'}, {'class_ids': [1], 'mask_name': '590', 'image_name': '590'}, {'class_ids': [1], 'mask_name': '591', 'image_name': '591'}, {'class_ids': [1], 'mask_name': '592', 'image_name': '592'}, {'class_ids': [1], 'mask_name': '593', 'image_name': '593'}, {'class_ids': [1], 'mask_name': '594', 'image_name': '594'}, {'class_ids': [1], 'mask_name': '595', 'image_name': '595'}, {'class_ids': [1], 'mask_name': '596', 'image_name': '596'}, {'class_ids': [1], 'mask_name': '597', 'image_name': '597'}, {'class_ids': [1], 'mask_name': '598', 'image_name': '598'}, {'class_ids': [1], 'mask_name': '599', 'image_name': '599'}, {'class_ids': [1], 'mask_name': '600', 'image_name': '600'}, {'class_ids': [1], 'mask_name': '601', 'image_name': '601'}, {'class_ids': [1], 'mask_name': '602', 'image_name': '602'}, {'class_ids': [1], 'mask_name': '603', 'image_name': '603'}, {'class_ids': [1], 'mask_name': '604', 'image_name': '604'}, {'class_ids': [1], 'mask_name': '605', 'image_name': '605'}, {'class_ids': [1], 'mask_name': '606', 'image_name': '606'}, {'class_ids': [1], 'mask_name': '607', 'image_name': '607'}, {'class_ids': [1], 'mask_name': '608', 'image_name': '608'}, {'class_ids': [1], 'mask_name': '609', 'image_name': '609'}, {'class_ids': [1], 'mask_name': '610', 'image_name': '610'}, {'class_ids': [1], 'mask_name': '611', 'image_name': '611'}, {'class_ids': [1], 'mask_name': '612', 'image_name': '612'}, {'class_ids': [1], 'mask_name': '613', 'image_name': '613'}, {'class_ids': [1], 'mask_name': '614', 'image_name': '614'}, {'class_ids': [1], 'mask_name': '615', 'image_name': '615'}, {'class_ids': [1], 'mask_name': '616', 'image_name': '616'}, {'class_ids': [1], 'mask_name': '617', 'image_name': '617'}, {'class_ids': [1], 'mask_name': '618', 'image_name': '618'}, {'class_ids': [1], 'mask_name': '619', 'image_name': '619'}, {'class_ids': [1], 'mask_name': '620', 'image_name': '620'}, {'class_ids': [1], 'mask_name': '621', 'image_name': '621'}, {'class_ids': [1], 'mask_name': '622', 'image_name': '622'}, {'class_ids': [1], 'mask_name': '623', 'image_name': '623'}, {'class_ids': [1], 'mask_name': '624', 'image_name': '624'}, {'class_ids': [1], 'mask_name': '625', 'image_name': '625'}, {'class_ids': [1], 'mask_name': '626', 'image_name': '626'}, {'class_ids': [1], 'mask_name': '627', 'image_name': '627'}, {'class_ids': [1], 'mask_name': '628', 'image_name': '628'}, {'class_ids': [1], 'mask_name': '629', 'image_name': '629'}, {'class_ids': [1], 'mask_name': '630', 'image_name': '630'}, {'class_ids': [1], 'mask_name': '631', 'image_name': '631'}, {'class_ids': [1], 'mask_name': '632', 'image_name': '632'}, {'class_ids': [1], 'mask_name': '633', 'image_name': '633'}, {'class_ids': [1], 'mask_name': '634', 'image_name': '634'}, {'class_ids': [1], 'mask_name': '635', 'image_name': '635'}, {'class_ids': [1], 'mask_name': '636', 'image_name': '636'}, {'class_ids': [1], 'mask_name': '637', 'image_name': '637'}, {'class_ids': [1], 'mask_name': '638', 'image_name': '638'}, {'class_ids': [1], 'mask_name': '639', 'image_name': '639'}, {'class_ids': [1], 'mask_name': '640', 'image_name': '640'}, {'class_ids': [1], 'mask_name': '641', 'image_name': '641'}, {'class_ids': [1], 'mask_name': '642', 'image_name': '642'}, {'class_ids': [1], 'mask_name': '643', 'image_name': '643'}, {'class_ids': [1], 'mask_name': '644', 'image_name': '644'}, {'class_ids': [1], 'mask_name': '645', 'image_name': '645'}, {'class_ids': [1], 'mask_name': '646', 'image_name': '646'}, {'class_ids': [1], 'mask_name': '647', 'image_name': '647'}, {'class_ids': [1], 'mask_name': '648', 'image_name': '648'}, {'class_ids': [1], 'mask_name': '649', 'image_name': '649'}, {'class_ids': [1], 'mask_name': '650', 'image_name': '650'}, {'class_ids': [1], 'mask_name': '651', 'image_name': '651'}, {'class_ids': [1], 'mask_name': '652', 'image_name': '652'}, {'class_ids': [1], 'mask_name': '653', 'image_name': '653'}, {'class_ids': [1], 'mask_name': '654', 'image_name': '654'}, {'class_ids': [1], 'mask_name': '655', 'image_name': '655'}, {'class_ids': [1], 'mask_name': '656', 'image_name': '656'}, {'class_ids': [1], 'mask_name': '657', 'image_name': '657'}, {'class_ids': [1], 'mask_name': '658', 'image_name': '658'}, {'class_ids': [1], 'mask_name': '659', 'image_name': '659'}, {'class_ids': [1], 'mask_name': '660', 'image_name': '660'}, {'class_ids': [1], 'mask_name': '661', 'image_name': '661'}, {'class_ids': [1], 'mask_name': '662', 'image_name': '662'}, {'class_ids': [1], 'mask_name': '663', 'image_name': '663'}, {'class_ids': [1], 'mask_name': '664', 'image_name': '664'}, {'class_ids': [1], 'mask_name': '665', 'image_name': '665'}, {'class_ids': [1], 'mask_name': '666', 'image_name': '666'}, {'class_ids': [1], 'mask_name': '667', 'image_name': '667'}, {'class_ids': [1], 'mask_name': '668', 'image_name': '668'}, {'class_ids': [1], 'mask_name': '669', 'image_name': '669'}, {'class_ids': [1], 'mask_name': '670', 'image_name': '670'}, {'class_ids': [1], 'mask_name': '671', 'image_name': '671'}, {'class_ids': [1], 'mask_name': '672', 'image_name': '672'}, {'class_ids': [1], 'mask_name': '673', 'image_name': '673'}, {'class_ids': [1], 'mask_name': '674', 'image_name': '674'}, {'class_ids': [1], 'mask_name': '675', 'image_name': '675'}, {'class_ids': [1], 'mask_name': '676', 'image_name': '676'}, {'class_ids': [1], 'mask_name': '677', 'image_name': '677'}, {'class_ids': [1], 'mask_name': '678', 'image_name': '678'}, {'class_ids': [1], 'mask_name': '679', 'image_name': '679'}, {'class_ids': [1], 'mask_name': '680', 'image_name': '680'}, {'class_ids': [1], 'mask_name': '681', 'image_name': '681'}, {'class_ids': [1], 'mask_name': '682', 'image_name': '682'}, {'class_ids': [1], 'mask_name': '683', 'image_name': '683'}, {'class_ids': [1], 'mask_name': '684', 'image_name': '684'}, {'class_ids': [1], 'mask_name': '685', 'image_name': '685'}, {'class_ids': [1], 'mask_name': '686', 'image_name': '686'}, {'class_ids': [1], 'mask_name': '687', 'image_name': '687'}, {'class_ids': [1], 'mask_name': '688', 'image_name': '688'}, {'class_ids': [1], 'mask_name': '689', 'image_name': '689'}, {'class_ids': [1], 'mask_name': '690', 'image_name': '690'}, {'class_ids': [1], 'mask_name': '691', 'image_name': '691'}, {'class_ids': [1], 'mask_name': '692', 'image_name': '692'}, {'class_ids': [1], 'mask_name': '693', 'image_name': '693'}, {'class_ids': [1], 'mask_name': '694', 'image_name': '694'}, {'class_ids': [1], 'mask_name': '695', 'image_name': '695'}, {'class_ids': [1], 'mask_name': '696', 'image_name': '696'}, {'class_ids': [1], 'mask_name': '697', 'image_name': '697'}, {'class_ids': [1], 'mask_name': '698', 'image_name': '698'}, {'class_ids': [1], 'mask_name': '699', 'image_name': '699'}, {'class_ids': [1], 'mask_name': '700', 'image_name': '700'}, {'class_ids': [1], 'mask_name': '701', 'image_name': '701'}, {'class_ids': [1], 'mask_name': '702', 'image_name': '702'}, {'class_ids': [1], 'mask_name': '703', 'image_name': '703'}, {'class_ids': [1], 'mask_name': '704', 'image_name': '704'}, {'class_ids': [1], 'mask_name': '705', 'image_name': '705'}, {'class_ids': [1], 'mask_name': '706', 'image_name': '706'}, {'class_ids': [1], 'mask_name': '707', 'image_name': '707'}, {'class_ids': [1], 'mask_name': '708', 'image_name': '708'}, {'class_ids': [1], 'mask_name': '709', 'image_name': '709'}, {'class_ids': [1], 'mask_name': '710', 'image_name': '710'}, {'class_ids': [1], 'mask_name': '711', 'image_name': '711'}, {'class_ids': [1], 'mask_name': '712', 'image_name': '712'}, {'class_ids': [1], 'mask_name': '713', 'image_name': '713'}, {'class_ids': [1], 'mask_name': '714', 'image_name': '714'}, {'class_ids': [1], 'mask_name': '715', 'image_name': '715'}, {'class_ids': [1], 'mask_name': '716', 'image_name': '716'}, {'class_ids': [1], 'mask_name': '717', 'image_name': '717'}, {'class_ids': [1], 'mask_name': '718', 'image_name': '718'}, {'class_ids': [1], 'mask_name': '719', 'image_name': '719'}, {'class_ids': [1], 'mask_name': '720', 'image_name': '720'}]
+HHHHHHHHHHHHHHHHHHHHHHHHH
+[{'class_ids': [1], 'mask_name': '000', 'image_name': '000'}, {'class_ids': [1], 'mask_name': '001', 'image_name': '001'}, {'class_ids': [1], 'mask_name': '002', 'image_name': '002'}, {'class_ids': [1], 'mask_name': '003', 'image_name': '003'}, {'class_ids': [1], 'mask_name': '004', 'image_name': '004'}, {'class_ids': [1], 'mask_name': '005', 'image_name': '005'}, {'class_ids': [1], 'mask_name': '006', 'image_name': '006'}, {'class_ids': [1], 'mask_name': '007', 'image_name': '007'}, {'class_ids': [1], 'mask_name': '008', 'image_name': '008'}, {'class_ids': [1], 'mask_name': '009', 'image_name': '009'}, {'class_ids': [1], 'mask_name': '010', 'image_name': '010'}, {'class_ids': [1], 'mask_name': '011', 'image_name': '011'}, {'class_ids': [1], 'mask_name': '012', 'image_name': '012'}, {'class_ids': [1], 'mask_name': '013', 'image_name': '013'}, {'class_ids': [1], 'mask_name': '014', 'image_name': '014'}, {'class_ids': [1], 'mask_name': '015', 'image_name': '015'}, {'class_ids': [1], 'mask_name': '016', 'image_name': '016'}, {'class_ids': [1], 'mask_name': '017', 'image_name': '017'}, {'class_ids': [1], 'mask_name': '018', 'image_name': '018'}, {'class_ids': [1], 'mask_name': '019', 'image_name': '019'}, {'class_ids': [1], 'mask_name': '020', 'image_name': '020'}, {'class_ids': [1], 'mask_name': '021', 'image_name': '021'}, {'class_ids': [1], 'mask_name': '022', 'image_name': '022'}, {'class_ids': [1], 'mask_name': '023', 'image_name': '023'}, {'class_ids': [1], 'mask_name': '024', 'image_name': '024'}, {'class_ids': [1], 'mask_name': '025', 'image_name': '025'}, {'class_ids': [1], 'mask_name': '026', 'image_name': '026'}, {'class_ids': [1], 'mask_name': '027', 'image_name': '027'}, {'class_ids': [1], 'mask_name': '028', 'image_name': '028'}, {'class_ids': [1], 'mask_name': '029', 'image_name': '029'}, {'class_ids': [1], 'mask_name': '030', 'image_name': '030'}, {'class_ids': [1], 'mask_name': '031', 'image_name': '031'}, {'class_ids': [1], 'mask_name': '032', 'image_name': '032'}, {'class_ids': [1], 'mask_name': '033', 'image_name': '033'}, {'class_ids': [1], 'mask_name': '034', 'image_name': '034'}, {'class_ids': [1], 'mask_name': '035', 'image_name': '035'}, {'class_ids': [1], 'mask_name': '036', 'image_name': '036'}, {'class_ids': [1], 'mask_name': '037', 'image_name': '037'}, {'class_ids': [1], 'mask_name': '038', 'image_name': '038'}, {'class_ids': [1], 'mask_name': '039', 'image_name': '039'}, {'class_ids': [1], 'mask_name': '040', 'image_name': '040'}, {'class_ids': [1], 'mask_name': '041', 'image_name': '041'}, {'class_ids': [1], 'mask_name': '042', 'image_name': '042'}, {'class_ids': [1], 'mask_name': '043', 'image_name': '043'}, {'class_ids': [1], 'mask_name': '044', 'image_name': '044'}, {'class_ids': [1], 'mask_name': '045', 'image_name': '045'}, {'class_ids': [1], 'mask_name': '046', 'image_name': '046'}, {'class_ids': [1], 'mask_name': '047', 'image_name': '047'}, {'class_ids': [1], 'mask_name': '048', 'image_name': '048'}, {'class_ids': [1], 'mask_name': '049', 'image_name': '049'}, {'class_ids': [1], 'mask_name': '050', 'image_name': '050'}, {'class_ids': [1], 'mask_name': '051', 'image_name': '051'}, {'class_ids': [1], 'mask_name': '052', 'image_name': '052'}, {'class_ids': [1], 'mask_name': '053', 'image_name': '053'}, {'class_ids': [1], 'mask_name': '054', 'image_name': '054'}, {'class_ids': [1], 'mask_name': '055', 'image_name': '055'}, {'class_ids': [1], 'mask_name': '056', 'image_name': '056'}, {'class_ids': [1], 'mask_name': '057', 'image_name': '057'}, {'class_ids': [1], 'mask_name': '058', 'image_name': '058'}, {'class_ids': [1], 'mask_name': '059', 'image_name': '059'}, {'class_ids': [1], 'mask_name': '060', 'image_name': '060'}, {'class_ids': [1], 'mask_name': '061', 'image_name': '061'}, {'class_ids': [1], 'mask_name': '062', 'image_name': '062'}, {'class_ids': [1], 'mask_name': '063', 'image_name': '063'}, {'class_ids': [1], 'mask_name': '064', 'image_name': '064'}, {'class_ids': [1], 'mask_name': '065', 'image_name': '065'}, {'class_ids': [1], 'mask_name': '066', 'image_name': '066'}, {'class_ids': [1], 'mask_name': '067', 'image_name': '067'}, {'class_ids': [1], 'mask_name': '068', 'image_name': '068'}, {'class_ids': [1], 'mask_name': '069', 'image_name': '069'}, {'class_ids': [1], 'mask_name': '070', 'image_name': '070'}, {'class_ids': [1], 'mask_name': '071', 'image_name': '071'}, {'class_ids': [1], 'mask_name': '072', 'image_name': '072'}, {'class_ids': [1], 'mask_name': '073', 'image_name': '073'}, {'class_ids': [1], 'mask_name': '074', 'image_name': '074'}, {'class_ids': [1], 'mask_name': '075', 'image_name': '075'}, {'class_ids': [1], 'mask_name': '076', 'image_name': '076'}, {'class_ids': [1], 'mask_name': '077', 'image_name': '077'}, {'class_ids': [1], 'mask_name': '078', 'image_name': '078'}, {'class_ids': [1], 'mask_name': '079', 'image_name': '079'}, {'class_ids': [1], 'mask_name': '080', 'image_name': '080'}, {'class_ids': [1], 'mask_name': '081', 'image_name': '081'}, {'class_ids': [1], 'mask_name': '082', 'image_name': '082'}, {'class_ids': [1], 'mask_name': '083', 'image_name': '083'}, {'class_ids': [1], 'mask_name': '084', 'image_name': '084'}, {'class_ids': [1], 'mask_name': '085', 'image_name': '085'}, {'class_ids': [1], 'mask_name': '086', 'image_name': '086'}, {'class_ids': [1], 'mask_name': '087', 'image_name': '087'}, {'class_ids': [1], 'mask_name': '088', 'image_name': '088'}, {'class_ids': [1], 'mask_name': '089', 'image_name': '089'}, {'class_ids': [1], 'mask_name': '090', 'image_name': '090'}, {'class_ids': [1], 'mask_name': '091', 'image_name': '091'}, {'class_ids': [1], 'mask_name': '092', 'image_name': '092'}, {'class_ids': [1], 'mask_name': '093', 'image_name': '093'}, {'class_ids': [1], 'mask_name': '094', 'image_name': '094'}, {'class_ids': [1], 'mask_name': '095', 'image_name': '095'}, {'class_ids': [1], 'mask_name': '096', 'image_name': '096'}, {'class_ids': [1], 'mask_name': '097', 'image_name': '097'}, {'class_ids': [1], 'mask_name': '098', 'image_name': '098'}, {'class_ids': [1], 'mask_name': '099', 'image_name': '099'}, {'class_ids': [1], 'mask_name': '100', 'image_name': '100'}, {'class_ids': [1], 'mask_name': '101', 'image_name': '101'}, {'class_ids': [1], 'mask_name': '102', 'image_name': '102'}, {'class_ids': [1], 'mask_name': '103', 'image_name': '103'}, {'class_ids': [1], 'mask_name': '104', 'image_name': '104'}, {'class_ids': [1], 'mask_name': '105', 'image_name': '105'}, {'class_ids': [1], 'mask_name': '106', 'image_name': '106'}, {'class_ids': [1], 'mask_name': '107', 'image_name': '107'}, {'class_ids': [1], 'mask_name': '108', 'image_name': '108'}, {'class_ids': [1], 'mask_name': '109', 'image_name': '109'}, {'class_ids': [1], 'mask_name': '110', 'image_name': '110'}, {'class_ids': [1], 'mask_name': '111', 'image_name': '111'}, {'class_ids': [1], 'mask_name': '112', 'image_name': '112'}, {'class_ids': [1], 'mask_name': '113', 'image_name': '113'}, {'class_ids': [1], 'mask_name': '114', 'image_name': '114'}, {'class_ids': [1], 'mask_name': '115', 'image_name': '115'}, {'class_ids': [1], 'mask_name': '116', 'image_name': '116'}, {'class_ids': [1], 'mask_name': '117', 'image_name': '117'}, {'class_ids': [1], 'mask_name': '118', 'image_name': '118'}, {'class_ids': [1], 'mask_name': '119', 'image_name': '119'}, {'class_ids': [1], 'mask_name': '120', 'image_name': '120'}, {'class_ids': [1], 'mask_name': '121', 'image_name': '121'}, {'class_ids': [1], 'mask_name': '122', 'image_name': '122'}, {'class_ids': [1], 'mask_name': '123', 'image_name': '123'}, {'class_ids': [1], 'mask_name': '124', 'image_name': '124'}, {'class_ids': [1], 'mask_name': '125', 'image_name': '125'}, {'class_ids': [1], 'mask_name': '126', 'image_name': '126'}, {'class_ids': [1], 'mask_name': '127', 'image_name': '127'}, {'class_ids': [1], 'mask_name': '128', 'image_name': '128'}, {'class_ids': [1], 'mask_name': '129', 'image_name': '129'}, {'class_ids': [1], 'mask_name': '130', 'image_name': '130'}, {'class_ids': [1], 'mask_name': '131', 'image_name': '131'}, {'class_ids': [1], 'mask_name': '132', 'image_name': '132'}, {'class_ids': [1], 'mask_name': '133', 'image_name': '133'}, {'class_ids': [1], 'mask_name': '134', 'image_name': '134'}, {'class_ids': [1], 'mask_name': '135', 'image_name': '135'}, {'class_ids': [1], 'mask_name': '136', 'image_name': '136'}, {'class_ids': [1], 'mask_name': '137', 'image_name': '137'}, {'class_ids': [1], 'mask_name': '138', 'image_name': '138'}, {'class_ids': [1], 'mask_name': '139', 'image_name': '139'}, {'class_ids': [1], 'mask_name': '140', 'image_name': '140'}, {'class_ids': [1], 'mask_name': '141', 'image_name': '141'}, {'class_ids': [1], 'mask_name': '142', 'image_name': '142'}, {'class_ids': [1], 'mask_name': '143', 'image_name': '143'}, {'class_ids': [1], 'mask_name': '144', 'image_name': '144'}, {'class_ids': [1], 'mask_name': '145', 'image_name': '145'}, {'class_ids': [1], 'mask_name': '146', 'image_name': '146'}, {'class_ids': [1], 'mask_name': '147', 'image_name': '147'}, {'class_ids': [1], 'mask_name': '148', 'image_name': '148'}, {'class_ids': [1], 'mask_name': '149', 'image_name': '149'}, {'class_ids': [1], 'mask_name': '150', 'image_name': '150'}, {'class_ids': [1], 'mask_name': '151', 'image_name': '151'}, {'class_ids': [1], 'mask_name': '152', 'image_name': '152'}, {'class_ids': [1], 'mask_name': '153', 'image_name': '153'}, {'class_ids': [1], 'mask_name': '154', 'image_name': '154'}, {'class_ids': [1], 'mask_name': '155', 'image_name': '155'}, {'class_ids': [1], 'mask_name': '156', 'image_name': '156'}, {'class_ids': [1], 'mask_name': '157', 'image_name': '157'}, {'class_ids': [1], 'mask_name': '158', 'image_name': '158'}, {'class_ids': [1], 'mask_name': '159', 'image_name': '159'}, {'class_ids': [1], 'mask_name': '160', 'image_name': '160'}, {'class_ids': [1], 'mask_name': '161', 'image_name': '161'}, {'class_ids': [1], 'mask_name': '162', 'image_name': '162'}, {'class_ids': [1], 'mask_name': '163', 'image_name': '163'}, {'class_ids': [1], 'mask_name': '164', 'image_name': '164'}, {'class_ids': [1], 'mask_name': '165', 'image_name': '165'}, {'class_ids': [1], 'mask_name': '166', 'image_name': '166'}, {'class_ids': [1], 'mask_name': '167', 'image_name': '167'}, {'class_ids': [1], 'mask_name': '168', 'image_name': '168'}, {'class_ids': [1], 'mask_name': '169', 'image_name': '169'}, {'class_ids': [1], 'mask_name': '170', 'image_name': '170'}, {'class_ids': [1], 'mask_name': '171', 'image_name': '171'}, {'class_ids': [1], 'mask_name': '172', 'image_name': '172'}, {'class_ids': [1], 'mask_name': '173', 'image_name': '173'}, {'class_ids': [1], 'mask_name': '174', 'image_name': '174'}, {'class_ids': [1], 'mask_name': '175', 'image_name': '175'}, {'class_ids': [1], 'mask_name': '176', 'image_name': '176'}, {'class_ids': [1], 'mask_name': '177', 'image_name': '177'}, {'class_ids': [1], 'mask_name': '178', 'image_name': '178'}, {'class_ids': [1], 'mask_name': '179', 'image_name': '179'}, {'class_ids': [1], 'mask_name': '180', 'image_name': '180'}, {'class_ids': [1], 'mask_name': '181', 'image_name': '181'}, {'class_ids': [1], 'mask_name': '182', 'image_name': '182'}, {'class_ids': [1], 'mask_name': '183', 'image_name': '183'}, {'class_ids': [1], 'mask_name': '184', 'image_name': '184'}, {'class_ids': [1], 'mask_name': '185', 'image_name': '185'}, {'class_ids': [1], 'mask_name': '186', 'image_name': '186'}, {'class_ids': [1], 'mask_name': '187', 'image_name': '187'}, {'class_ids': [1], 'mask_name': '188', 'image_name': '188'}, {'class_ids': [1], 'mask_name': '189', 'image_name': '189'}, {'class_ids': [1], 'mask_name': '190', 'image_name': '190'}, {'class_ids': [1], 'mask_name': '191', 'image_name': '191'}, {'class_ids': [1], 'mask_name': '192', 'image_name': '192'}, {'class_ids': [1], 'mask_name': '193', 'image_name': '193'}, {'class_ids': [1], 'mask_name': '194', 'image_name': '194'}, {'class_ids': [1], 'mask_name': '195', 'image_name': '195'}, {'class_ids': [1], 'mask_name': '196', 'image_name': '196'}, {'class_ids': [1], 'mask_name': '197', 'image_name': '197'}, {'class_ids': [1], 'mask_name': '198', 'image_name': '198'}, {'class_ids': [1], 'mask_name': '199', 'image_name': '199'}, {'class_ids': [1], 'mask_name': '200', 'image_name': '200'}, {'class_ids': [1], 'mask_name': '201', 'image_name': '201'}, {'class_ids': [1], 'mask_name': '202', 'image_name': '202'}, {'class_ids': [1], 'mask_name': '203', 'image_name': '203'}, {'class_ids': [1], 'mask_name': '204', 'image_name': '204'}, {'class_ids': [1], 'mask_name': '205', 'image_name': '205'}, {'class_ids': [1], 'mask_name': '206', 'image_name': '206'}, {'class_ids': [1], 'mask_name': '207', 'image_name': '207'}, {'class_ids': [1], 'mask_name': '208', 'image_name': '208'}, {'class_ids': [1], 'mask_name': '209', 'image_name': '209'}, {'class_ids': [1], 'mask_name': '210', 'image_name': '210'}, {'class_ids': [1], 'mask_name': '211', 'image_name': '211'}, {'class_ids': [1], 'mask_name': '212', 'image_name': '212'}, {'class_ids': [1], 'mask_name': '213', 'image_name': '213'}, {'class_ids': [1], 'mask_name': '214', 'image_name': '214'}, {'class_ids': [1], 'mask_name': '215', 'image_name': '215'}, {'class_ids': [1], 'mask_name': '216', 'image_name': '216'}, {'class_ids': [1], 'mask_name': '217', 'image_name': '217'}, {'class_ids': [1], 'mask_name': '218', 'image_name': '218'}, {'class_ids': [1], 'mask_name': '219', 'image_name': '219'}, {'class_ids': [1], 'mask_name': '220', 'image_name': '220'}, {'class_ids': [1], 'mask_name': '221', 'image_name': '221'}, {'class_ids': [1], 'mask_name': '222', 'image_name': '222'}, {'class_ids': [1], 'mask_name': '223', 'image_name': '223'}, {'class_ids': [1], 'mask_name': '224', 'image_name': '224'}, {'class_ids': [1], 'mask_name': '225', 'image_name': '225'}, {'class_ids': [1], 'mask_name': '226', 'image_name': '226'}, {'class_ids': [1], 'mask_name': '227', 'image_name': '227'}, {'class_ids': [1], 'mask_name': '228', 'image_name': '228'}, {'class_ids': [1], 'mask_name': '229', 'image_name': '229'}, {'class_ids': [1], 'mask_name': '230', 'image_name': '230'}, {'class_ids': [1], 'mask_name': '231', 'image_name': '231'}, {'class_ids': [1], 'mask_name': '232', 'image_name': '232'}, {'class_ids': [1], 'mask_name': '233', 'image_name': '233'}, {'class_ids': [1], 'mask_name': '234', 'image_name': '234'}, {'class_ids': [1], 'mask_name': '235', 'image_name': '235'}, {'class_ids': [1], 'mask_name': '236', 'image_name': '236'}, {'class_ids': [1], 'mask_name': '237', 'image_name': '237'}, {'class_ids': [1], 'mask_name': '238', 'image_name': '238'}, {'class_ids': [1], 'mask_name': '239', 'image_name': '239'}, {'class_ids': [1], 'mask_name': '240', 'image_name': '240'}, {'class_ids': [1], 'mask_name': '241', 'image_name': '241'}, {'class_ids': [1], 'mask_name': '242', 'image_name': '242'}, {'class_ids': [1], 'mask_name': '243', 'image_name': '243'}, {'class_ids': [1], 'mask_name': '244', 'image_name': '244'}, {'class_ids': [1], 'mask_name': '245', 'image_name': '245'}, {'class_ids': [1], 'mask_name': '246', 'image_name': '246'}, {'class_ids': [1], 'mask_name': '247', 'image_name': '247'}, {'class_ids': [1], 'mask_name': '248', 'image_name': '248'}, {'class_ids': [1], 'mask_name': '249', 'image_name': '249'}, {'class_ids': [1], 'mask_name': '250', 'image_name': '250'}, {'class_ids': [1], 'mask_name': '251', 'image_name': '251'}, {'class_ids': [1], 'mask_name': '252', 'image_name': '252'}, {'class_ids': [1], 'mask_name': '253', 'image_name': '253'}, {'class_ids': [1], 'mask_name': '254', 'image_name': '254'}, {'class_ids': [1], 'mask_name': '255', 'image_name': '255'}, {'class_ids': [1], 'mask_name': '256', 'image_name': '256'}, {'class_ids': [1], 'mask_name': '257', 'image_name': '257'}, {'class_ids': [1], 'mask_name': '258', 'image_name': '258'}, {'class_ids': [1], 'mask_name': '259', 'image_name': '259'}, {'class_ids': [1], 'mask_name': '260', 'image_name': '260'}, {'class_ids': [1], 'mask_name': '261', 'image_name': '261'}, {'class_ids': [1], 'mask_name': '262', 'image_name': '262'}, {'class_ids': [1], 'mask_name': '263', 'image_name': '263'}, {'class_ids': [1], 'mask_name': '264', 'image_name': '264'}, {'class_ids': [1], 'mask_name': '265', 'image_name': '265'}, {'class_ids': [1], 'mask_name': '266', 'image_name': '266'}, {'class_ids': [1], 'mask_name': '267', 'image_name': '267'}, {'class_ids': [1], 'mask_name': '268', 'image_name': '268'}, {'class_ids': [1], 'mask_name': '269', 'image_name': '269'}, {'class_ids': [1], 'mask_name': '270', 'image_name': '270'}, {'class_ids': [1], 'mask_name': '271', 'image_name': '271'}, {'class_ids': [1], 'mask_name': '272', 'image_name': '272'}, {'class_ids': [1], 'mask_name': '273', 'image_name': '273'}, {'class_ids': [1], 'mask_name': '274', 'image_name': '274'}, {'class_ids': [1], 'mask_name': '275', 'image_name': '275'}, {'class_ids': [1], 'mask_name': '276', 'image_name': '276'}, {'class_ids': [1], 'mask_name': '277', 'image_name': '277'}, {'class_ids': [1], 'mask_name': '278', 'image_name': '278'}, {'class_ids': [1], 'mask_name': '279', 'image_name': '279'}, {'class_ids': [1], 'mask_name': '280', 'image_name': '280'}, {'class_ids': [1], 'mask_name': '281', 'image_name': '281'}, {'class_ids': [1], 'mask_name': '282', 'image_name': '282'}, {'class_ids': [1], 'mask_name': '283', 'image_name': '283'}, {'class_ids': [1], 'mask_name': '284', 'image_name': '284'}, {'class_ids': [1], 'mask_name': '285', 'image_name': '285'}, {'class_ids': [1], 'mask_name': '286', 'image_name': '286'}, {'class_ids': [1], 'mask_name': '287', 'image_name': '287'}, {'class_ids': [1], 'mask_name': '288', 'image_name': '288'}, {'class_ids': [1], 'mask_name': '289', 'image_name': '289'}, {'class_ids': [1], 'mask_name': '290', 'image_name': '290'}, {'class_ids': [1], 'mask_name': '291', 'image_name': '291'}, {'class_ids': [1], 'mask_name': '292', 'image_name': '292'}, {'class_ids': [1], 'mask_name': '293', 'image_name': '293'}, {'class_ids': [1], 'mask_name': '294', 'image_name': '294'}, {'class_ids': [1], 'mask_name': '295', 'image_name': '295'}, {'class_ids': [1], 'mask_name': '296', 'image_name': '296'}, {'class_ids': [1], 'mask_name': '297', 'image_name': '297'}, {'class_ids': [1], 'mask_name': '298', 'image_name': '298'}, {'class_ids': [1], 'mask_name': '299', 'image_name': '299'}, {'class_ids': [1], 'mask_name': '300', 'image_name': '300'}, {'class_ids': [1], 'mask_name': '301', 'image_name': '301'}, {'class_ids': [1], 'mask_name': '302', 'image_name': '302'}, {'class_ids': [1], 'mask_name': '303', 'image_name': '303'}, {'class_ids': [1], 'mask_name': '304', 'image_name': '304'}, {'class_ids': [1], 'mask_name': '305', 'image_name': '305'}, {'class_ids': [1], 'mask_name': '306', 'image_name': '306'}, {'class_ids': [1], 'mask_name': '307', 'image_name': '307'}, {'class_ids': [1], 'mask_name': '308', 'image_name': '308'}, {'class_ids': [1], 'mask_name': '309', 'image_name': '309'}, {'class_ids': [1], 'mask_name': '310', 'image_name': '310'}, {'class_ids': [1], 'mask_name': '311', 'image_name': '311'}, {'class_ids': [1], 'mask_name': '312', 'image_name': '312'}, {'class_ids': [1], 'mask_name': '313', 'image_name': '313'}, {'class_ids': [1], 'mask_name': '314', 'image_name': '314'}, {'class_ids': [1], 'mask_name': '315', 'image_name': '315'}, {'class_ids': [1], 'mask_name': '316', 'image_name': '316'}, {'class_ids': [1], 'mask_name': '317', 'image_name': '317'}, {'class_ids': [1], 'mask_name': '318', 'image_name': '318'}, {'class_ids': [1], 'mask_name': '319', 'image_name': '319'}, {'class_ids': [1], 'mask_name': '320', 'image_name': '320'}, {'class_ids': [1], 'mask_name': '321', 'image_name': '321'}, {'class_ids': [1], 'mask_name': '322', 'image_name': '322'}, {'class_ids': [1], 'mask_name': '323', 'image_name': '323'}, {'class_ids': [1], 'mask_name': '324', 'image_name': '324'}, {'class_ids': [1], 'mask_name': '325', 'image_name': '325'}, {'class_ids': [1], 'mask_name': '326', 'image_name': '326'}, {'class_ids': [1], 'mask_name': '327', 'image_name': '327'}, {'class_ids': [1], 'mask_name': '328', 'image_name': '328'}, {'class_ids': [1], 'mask_name': '329', 'image_name': '329'}, {'class_ids': [1], 'mask_name': '330', 'image_name': '330'}, {'class_ids': [1], 'mask_name': '331', 'image_name': '331'}, {'class_ids': [1], 'mask_name': '332', 'image_name': '332'}, {'class_ids': [1], 'mask_name': '333', 'image_name': '333'}, {'class_ids': [1], 'mask_name': '334', 'image_name': '334'}, {'class_ids': [1], 'mask_name': '335', 'image_name': '335'}, {'class_ids': [1], 'mask_name': '336', 'image_name': '336'}, {'class_ids': [1], 'mask_name': '337', 'image_name': '337'}, {'class_ids': [1], 'mask_name': '338', 'image_name': '338'}, {'class_ids': [1], 'mask_name': '339', 'image_name': '339'}, {'class_ids': [1], 'mask_name': '340', 'image_name': '340'}, {'class_ids': [1], 'mask_name': '341', 'image_name': '341'}, {'class_ids': [1], 'mask_name': '342', 'image_name': '342'}, {'class_ids': [1], 'mask_name': '343', 'image_name': '343'}, {'class_ids': [1], 'mask_name': '344', 'image_name': '344'}, {'class_ids': [1], 'mask_name': '345', 'image_name': '345'}, {'class_ids': [1], 'mask_name': '346', 'image_name': '346'}, {'class_ids': [1], 'mask_name': '347', 'image_name': '347'}, {'class_ids': [1], 'mask_name': '348', 'image_name': '348'}, {'class_ids': [1], 'mask_name': '349', 'image_name': '349'}, {'class_ids': [1], 'mask_name': '350', 'image_name': '350'}, {'class_ids': [1], 'mask_name': '351', 'image_name': '351'}, {'class_ids': [1], 'mask_name': '352', 'image_name': '352'}, {'class_ids': [1], 'mask_name': '353', 'image_name': '353'}, {'class_ids': [1], 'mask_name': '354', 'image_name': '354'}, {'class_ids': [1], 'mask_name': '355', 'image_name': '355'}, {'class_ids': [1], 'mask_name': '356', 'image_name': '356'}, {'class_ids': [1], 'mask_name': '357', 'image_name': '357'}, {'class_ids': [1], 'mask_name': '358', 'image_name': '358'}, {'class_ids': [1], 'mask_name': '359', 'image_name': '359'}, {'class_ids': [1], 'mask_name': '360', 'image_name': '360'}, {'class_ids': [1], 'mask_name': '361', 'image_name': '361'}, {'class_ids': [1], 'mask_name': '362', 'image_name': '362'}, {'class_ids': [1], 'mask_name': '363', 'image_name': '363'}, {'class_ids': [1], 'mask_name': '364', 'image_name': '364'}, {'class_ids': [1], 'mask_name': '365', 'image_name': '365'}, {'class_ids': [1], 'mask_name': '366', 'image_name': '366'}, {'class_ids': [1], 'mask_name': '367', 'image_name': '367'}, {'class_ids': [1], 'mask_name': '368', 'image_name': '368'}, {'class_ids': [1], 'mask_name': '369', 'image_name': '369'}, {'class_ids': [1], 'mask_name': '370', 'image_name': '370'}, {'class_ids': [1], 'mask_name': '371', 'image_name': '371'}, {'class_ids': [1], 'mask_name': '372', 'image_name': '372'}, {'class_ids': [1], 'mask_name': '373', 'image_name': '373'}, {'class_ids': [1], 'mask_name': '374', 'image_name': '374'}, {'class_ids': [1], 'mask_name': '375', 'image_name': '375'}, {'class_ids': [1], 'mask_name': '376', 'image_name': '376'}, {'class_ids': [1], 'mask_name': '377', 'image_name': '377'}, {'class_ids': [1], 'mask_name': '378', 'image_name': '378'}, {'class_ids': [1], 'mask_name': '379', 'image_name': '379'}, {'class_ids': [1], 'mask_name': '380', 'image_name': '380'}, {'class_ids': [1], 'mask_name': '381', 'image_name': '381'}, {'class_ids': [1], 'mask_name': '382', 'image_name': '382'}, {'class_ids': [1], 'mask_name': '383', 'image_name': '383'}, {'class_ids': [1], 'mask_name': '384', 'image_name': '384'}, {'class_ids': [1], 'mask_name': '385', 'image_name': '385'}, {'class_ids': [1], 'mask_name': '386', 'image_name': '386'}, {'class_ids': [1], 'mask_name': '387', 'image_name': '387'}, {'class_ids': [1], 'mask_name': '388', 'image_name': '388'}, {'class_ids': [1], 'mask_name': '389', 'image_name': '389'}, {'class_ids': [1], 'mask_name': '390', 'image_name': '390'}, {'class_ids': [1], 'mask_name': '391', 'image_name': '391'}, {'class_ids': [1], 'mask_name': '392', 'image_name': '392'}, {'class_ids': [1], 'mask_name': '393', 'image_name': '393'}, {'class_ids': [1], 'mask_name': '394', 'image_name': '394'}, {'class_ids': [1], 'mask_name': '395', 'image_name': '395'}, {'class_ids': [1], 'mask_name': '396', 'image_name': '396'}, {'class_ids': [1], 'mask_name': '397', 'image_name': '397'}, {'class_ids': [1], 'mask_name': '398', 'image_name': '398'}, {'class_ids': [1], 'mask_name': '399', 'image_name': '399'}, {'class_ids': [1], 'mask_name': '400', 'image_name': '400'}, {'class_ids': [1], 'mask_name': '401', 'image_name': '401'}, {'class_ids': [1], 'mask_name': '402', 'image_name': '402'}, {'class_ids': [1], 'mask_name': '403', 'image_name': '403'}, {'class_ids': [1], 'mask_name': '404', 'image_name': '404'}, {'class_ids': [1], 'mask_name': '405', 'image_name': '405'}, {'class_ids': [1], 'mask_name': '406', 'image_name': '406'}, {'class_ids': [1], 'mask_name': '407', 'image_name': '407'}, {'class_ids': [1], 'mask_name': '408', 'image_name': '408'}, {'class_ids': [1], 'mask_name': '409', 'image_name': '409'}, {'class_ids': [1], 'mask_name': '410', 'image_name': '410'}, {'class_ids': [1], 'mask_name': '411', 'image_name': '411'}, {'class_ids': [1], 'mask_name': '412', 'image_name': '412'}, {'class_ids': [1], 'mask_name': '413', 'image_name': '413'}, {'class_ids': [1], 'mask_name': '414', 'image_name': '414'}, {'class_ids': [1], 'mask_name': '415', 'image_name': '415'}, {'class_ids': [1], 'mask_name': '416', 'image_name': '416'}, {'class_ids': [1], 'mask_name': '417', 'image_name': '417'}, {'class_ids': [1], 'mask_name': '418', 'image_name': '418'}, {'class_ids': [1], 'mask_name': '419', 'image_name': '419'}, {'class_ids': [1], 'mask_name': '420', 'image_name': '420'}, {'class_ids': [1], 'mask_name': '421', 'image_name': '421'}, {'class_ids': [1], 'mask_name': '422', 'image_name': '422'}, {'class_ids': [1], 'mask_name': '423', 'image_name': '423'}, {'class_ids': [1], 'mask_name': '424', 'image_name': '424'}, {'class_ids': [1], 'mask_name': '425', 'image_name': '425'}, {'class_ids': [1], 'mask_name': '426', 'image_name': '426'}, {'class_ids': [1], 'mask_name': '427', 'image_name': '427'}, {'class_ids': [1], 'mask_name': '428', 'image_name': '428'}, {'class_ids': [1], 'mask_name': '429', 'image_name': '429'}, {'class_ids': [1], 'mask_name': '430', 'image_name': '430'}, {'class_ids': [1], 'mask_name': '431', 'image_name': '431'}, {'class_ids': [1], 'mask_name': '432', 'image_name': '432'}, {'class_ids': [1], 'mask_name': '433', 'image_name': '433'}, {'class_ids': [1], 'mask_name': '434', 'image_name': '434'}, {'class_ids': [1], 'mask_name': '435', 'image_name': '435'}, {'class_ids': [1], 'mask_name': '436', 'image_name': '436'}, {'class_ids': [1], 'mask_name': '437', 'image_name': '437'}, {'class_ids': [1], 'mask_name': '438', 'image_name': '438'}, {'class_ids': [1], 'mask_name': '439', 'image_name': '439'}, {'class_ids': [1], 'mask_name': '440', 'image_name': '440'}, {'class_ids': [1], 'mask_name': '441', 'image_name': '441'}, {'class_ids': [1], 'mask_name': '442', 'image_name': '442'}, {'class_ids': [1], 'mask_name': '443', 'image_name': '443'}, {'class_ids': [1], 'mask_name': '444', 'image_name': '444'}, {'class_ids': [1], 'mask_name': '445', 'image_name': '445'}, {'class_ids': [1], 'mask_name': '446', 'image_name': '446'}, {'class_ids': [1], 'mask_name': '447', 'image_name': '447'}, {'class_ids': [1], 'mask_name': '448', 'image_name': '448'}, {'class_ids': [1], 'mask_name': '449', 'image_name': '449'}, {'class_ids': [1], 'mask_name': '450', 'image_name': '450'}, {'class_ids': [1], 'mask_name': '451', 'image_name': '451'}, {'class_ids': [1], 'mask_name': '452', 'image_name': '452'}, {'class_ids': [1], 'mask_name': '453', 'image_name': '453'}, {'class_ids': [1], 'mask_name': '454', 'image_name': '454'}, {'class_ids': [1], 'mask_name': '455', 'image_name': '455'}, {'class_ids': [1], 'mask_name': '456', 'image_name': '456'}, {'class_ids': [1], 'mask_name': '457', 'image_name': '457'}, {'class_ids': [1], 'mask_name': '458', 'image_name': '458'}, {'class_ids': [1], 'mask_name': '459', 'image_name': '459'}, {'class_ids': [1], 'mask_name': '460', 'image_name': '460'}, {'class_ids': [1], 'mask_name': '461', 'image_name': '461'}, {'class_ids': [1], 'mask_name': '462', 'image_name': '462'}, {'class_ids': [1], 'mask_name': '463', 'image_name': '463'}, {'class_ids': [1], 'mask_name': '464', 'image_name': '464'}, {'class_ids': [1], 'mask_name': '465', 'image_name': '465'}, {'class_ids': [1], 'mask_name': '466', 'image_name': '466'}, {'class_ids': [1], 'mask_name': '467', 'image_name': '467'}, {'class_ids': [1], 'mask_name': '468', 'image_name': '468'}, {'class_ids': [1], 'mask_name': '469', 'image_name': '469'}, {'class_ids': [1], 'mask_name': '470', 'image_name': '470'}, {'class_ids': [1], 'mask_name': '471', 'image_name': '471'}, {'class_ids': [1], 'mask_name': '472', 'image_name': '472'}, {'class_ids': [1], 'mask_name': '473', 'image_name': '473'}, {'class_ids': [1], 'mask_name': '474', 'image_name': '474'}, {'class_ids': [1], 'mask_name': '475', 'image_name': '475'}, {'class_ids': [1], 'mask_name': '476', 'image_name': '476'}, {'class_ids': [1], 'mask_name': '477', 'image_name': '477'}, {'class_ids': [1], 'mask_name': '478', 'image_name': '478'}, {'class_ids': [1], 'mask_name': '479', 'image_name': '479'}, {'class_ids': [1], 'mask_name': '480', 'image_name': '480'}, {'class_ids': [1], 'mask_name': '481', 'image_name': '481'}, {'class_ids': [1], 'mask_name': '482', 'image_name': '482'}, {'class_ids': [1], 'mask_name': '483', 'image_name': '483'}, {'class_ids': [1], 'mask_name': '484', 'image_name': '484'}, {'class_ids': [1], 'mask_name': '485', 'image_name': '485'}, {'class_ids': [1], 'mask_name': '486', 'image_name': '486'}, {'class_ids': [1], 'mask_name': '487', 'image_name': '487'}, {'class_ids': [1], 'mask_name': '488', 'image_name': '488'}, {'class_ids': [1], 'mask_name': '489', 'image_name': '489'}, {'class_ids': [1], 'mask_name': '490', 'image_name': '490'}, {'class_ids': [1], 'mask_name': '491', 'image_name': '491'}, {'class_ids': [1], 'mask_name': '492', 'image_name': '492'}, {'class_ids': [1], 'mask_name': '493', 'image_name': '493'}, {'class_ids': [1], 'mask_name': '494', 'image_name': '494'}, {'class_ids': [1], 'mask_name': '495', 'image_name': '495'}, {'class_ids': [1], 'mask_name': '496', 'image_name': '496'}, {'class_ids': [1], 'mask_name': '497', 'image_name': '497'}, {'class_ids': [1], 'mask_name': '498', 'image_name': '498'}, {'class_ids': [1], 'mask_name': '499', 'image_name': '499'}, {'class_ids': [1], 'mask_name': '500', 'image_name': '500'}, {'class_ids': [1], 'mask_name': '501', 'image_name': '501'}, {'class_ids': [1], 'mask_name': '502', 'image_name': '502'}, {'class_ids': [1], 'mask_name': '503', 'image_name': '503'}, {'class_ids': [1], 'mask_name': '504', 'image_name': '504'}, {'class_ids': [1], 'mask_name': '505', 'image_name': '505'}, {'class_ids': [1], 'mask_name': '506', 'image_name': '506'}, {'class_ids': [1], 'mask_name': '507', 'image_name': '507'}, {'class_ids': [1], 'mask_name': '508', 'image_name': '508'}, {'class_ids': [1], 'mask_name': '509', 'image_name': '509'}, {'class_ids': [1], 'mask_name': '510', 'image_name': '510'}, {'class_ids': [1], 'mask_name': '511', 'image_name': '511'}, {'class_ids': [1], 'mask_name': '512', 'image_name': '512'}, {'class_ids': [1], 'mask_name': '513', 'image_name': '513'}, {'class_ids': [1], 'mask_name': '514', 'image_name': '514'}, {'class_ids': [1], 'mask_name': '515', 'image_name': '515'}, {'class_ids': [1], 'mask_name': '516', 'image_name': '516'}, {'class_ids': [1], 'mask_name': '517', 'image_name': '517'}, {'class_ids': [1], 'mask_name': '518', 'image_name': '518'}, {'class_ids': [1], 'mask_name': '519', 'image_name': '519'}, {'class_ids': [1], 'mask_name': '520', 'image_name': '520'}, {'class_ids': [1], 'mask_name': '521', 'image_name': '521'}, {'class_ids': [1], 'mask_name': '522', 'image_name': '522'}, {'class_ids': [1], 'mask_name': '523', 'image_name': '523'}, {'class_ids': [1], 'mask_name': '524', 'image_name': '524'}, {'class_ids': [1], 'mask_name': '525', 'image_name': '525'}, {'class_ids': [1], 'mask_name': '526', 'image_name': '526'}, {'class_ids': [1], 'mask_name': '527', 'image_name': '527'}, {'class_ids': [1], 'mask_name': '528', 'image_name': '528'}, {'class_ids': [1], 'mask_name': '529', 'image_name': '529'}, {'class_ids': [1], 'mask_name': '530', 'image_name': '530'}, {'class_ids': [1], 'mask_name': '531', 'image_name': '531'}, {'class_ids': [1], 'mask_name': '532', 'image_name': '532'}, {'class_ids': [1], 'mask_name': '533', 'image_name': '533'}, {'class_ids': [1], 'mask_name': '534', 'image_name': '534'}, {'class_ids': [1], 'mask_name': '535', 'image_name': '535'}, {'class_ids': [1], 'mask_name': '536', 'image_name': '536'}, {'class_ids': [1], 'mask_name': '537', 'image_name': '537'}, {'class_ids': [1], 'mask_name': '538', 'image_name': '538'}, {'class_ids': [1], 'mask_name': '539', 'image_name': '539'}, {'class_ids': [1], 'mask_name': '540', 'image_name': '540'}, {'class_ids': [1], 'mask_name': '541', 'image_name': '541'}, {'class_ids': [1], 'mask_name': '542', 'image_name': '542'}, {'class_ids': [1], 'mask_name': '543', 'image_name': '543'}, {'class_ids': [1], 'mask_name': '544', 'image_name': '544'}, {'class_ids': [1], 'mask_name': '545', 'image_name': '545'}, {'class_ids': [1], 'mask_name': '546', 'image_name': '546'}, {'class_ids': [1], 'mask_name': '547', 'image_name': '547'}, {'class_ids': [1], 'mask_name': '548', 'image_name': '548'}, {'class_ids': [1], 'mask_name': '549', 'image_name': '549'}, {'class_ids': [1], 'mask_name': '550', 'image_name': '550'}, {'class_ids': [1], 'mask_name': '551', 'image_name': '551'}, {'class_ids': [1], 'mask_name': '552', 'image_name': '552'}, {'class_ids': [1], 'mask_name': '553', 'image_name': '553'}, {'class_ids': [1], 'mask_name': '554', 'image_name': '554'}, {'class_ids': [1], 'mask_name': '555', 'image_name': '555'}, {'class_ids': [1], 'mask_name': '556', 'image_name': '556'}, {'class_ids': [1], 'mask_name': '557', 'image_name': '557'}, {'class_ids': [1], 'mask_name': '558', 'image_name': '558'}, {'class_ids': [1], 'mask_name': '559', 'image_name': '559'}, {'class_ids': [1], 'mask_name': '560', 'image_name': '560'}, {'class_ids': [1], 'mask_name': '561', 'image_name': '561'}, {'class_ids': [1], 'mask_name': '562', 'image_name': '562'}, {'class_ids': [1], 'mask_name': '563', 'image_name': '563'}, {'class_ids': [1], 'mask_name': '564', 'image_name': '564'}, {'class_ids': [1], 'mask_name': '565', 'image_name': '565'}, {'class_ids': [1], 'mask_name': '566', 'image_name': '566'}, {'class_ids': [1], 'mask_name': '567', 'image_name': '567'}, {'class_ids': [1], 'mask_name': '568', 'image_name': '568'}, {'class_ids': [1], 'mask_name': '569', 'image_name': '569'}, {'class_ids': [1], 'mask_name': '570', 'image_name': '570'}, {'class_ids': [1], 'mask_name': '571', 'image_name': '571'}, {'class_ids': [1], 'mask_name': '572', 'image_name': '572'}, {'class_ids': [1], 'mask_name': '573', 'image_name': '573'}, {'class_ids': [1], 'mask_name': '574', 'image_name': '574'}, {'class_ids': [1], 'mask_name': '575', 'image_name': '575'}, {'class_ids': [1], 'mask_name': '576', 'image_name': '576'}, {'class_ids': [1], 'mask_name': '577', 'image_name': '577'}, {'class_ids': [1], 'mask_name': '578', 'image_name': '578'}, {'class_ids': [1], 'mask_name': '579', 'image_name': '579'}, {'class_ids': [1], 'mask_name': '580', 'image_name': '580'}, {'class_ids': [1], 'mask_name': '581', 'image_name': '581'}, {'class_ids': [1], 'mask_name': '582', 'image_name': '582'}, {'class_ids': [1], 'mask_name': '583', 'image_name': '583'}, {'class_ids': [1], 'mask_name': '584', 'image_name': '584'}, {'class_ids': [1], 'mask_name': '585', 'image_name': '585'}, {'class_ids': [1], 'mask_name': '586', 'image_name': '586'}, {'class_ids': [1], 'mask_name': '587', 'image_name': '587'}, {'class_ids': [1], 'mask_name': '588', 'image_name': '588'}, {'class_ids': [1], 'mask_name': '589', 'image_name': '589'}, {'class_ids': [1], 'mask_name': '590', 'image_name': '590'}, {'class_ids': [1], 'mask_name': '591', 'image_name': '591'}, {'class_ids': [1], 'mask_name': '592', 'image_name': '592'}, {'class_ids': [1], 'mask_name': '593', 'image_name': '593'}, {'class_ids': [1], 'mask_name': '594', 'image_name': '594'}, {'class_ids': [1], 'mask_name': '595', 'image_name': '595'}, {'class_ids': [1], 'mask_name': '596', 'image_name': '596'}, {'class_ids': [1], 'mask_name': '597', 'image_name': '597'}, {'class_ids': [1], 'mask_name': '598', 'image_name': '598'}, {'class_ids': [1], 'mask_name': '599', 'image_name': '599'}, {'class_ids': [1], 'mask_name': '600', 'image_name': '600'}, {'class_ids': [1], 'mask_name': '601', 'image_name': '601'}, {'class_ids': [1], 'mask_name': '602', 'image_name': '602'}, {'class_ids': [1], 'mask_name': '603', 'image_name': '603'}, {'class_ids': [1], 'mask_name': '604', 'image_name': '604'}, {'class_ids': [1], 'mask_name': '605', 'image_name': '605'}, {'class_ids': [1], 'mask_name': '606', 'image_name': '606'}, {'class_ids': [1], 'mask_name': '607', 'image_name': '607'}, {'class_ids': [1], 'mask_name': '608', 'image_name': '608'}, {'class_ids': [1], 'mask_name': '609', 'image_name': '609'}, {'class_ids': [1], 'mask_name': '610', 'image_name': '610'}, {'class_ids': [1], 'mask_name': '611', 'image_name': '611'}, {'class_ids': [1], 'mask_name': '612', 'image_name': '612'}, {'class_ids': [1], 'mask_name': '613', 'image_name': '613'}, {'class_ids': [1], 'mask_name': '614', 'image_name': '614'}, {'class_ids': [1], 'mask_name': '615', 'image_name': '615'}, {'class_ids': [1], 'mask_name': '616', 'image_name': '616'}, {'class_ids': [1], 'mask_name': '617', 'image_name': '617'}, {'class_ids': [1], 'mask_name': '618', 'image_name': '618'}, {'class_ids': [1], 'mask_name': '619', 'image_name': '619'}, {'class_ids': [1], 'mask_name': '620', 'image_name': '620'}, {'class_ids': [1], 'mask_name': '621', 'image_name': '621'}, {'class_ids': [1], 'mask_name': '622', 'image_name': '622'}, {'class_ids': [1], 'mask_name': '623', 'image_name': '623'}, {'class_ids': [1], 'mask_name': '624', 'image_name': '624'}, {'class_ids': [1], 'mask_name': '625', 'image_name': '625'}, {'class_ids': [1], 'mask_name': '626', 'image_name': '626'}, {'class_ids': [1], 'mask_name': '627', 'image_name': '627'}, {'class_ids': [1], 'mask_name': '628', 'image_name': '628'}, {'class_ids': [1], 'mask_name': '629', 'image_name': '629'}, {'class_ids': [1], 'mask_name': '630', 'image_name': '630'}, {'class_ids': [1], 'mask_name': '631', 'image_name': '631'}, {'class_ids': [1], 'mask_name': '632', 'image_name': '632'}, {'class_ids': [1], 'mask_name': '633', 'image_name': '633'}, {'class_ids': [1], 'mask_name': '634', 'image_name': '634'}, {'class_ids': [1], 'mask_name': '635', 'image_name': '635'}, {'class_ids': [1], 'mask_name': '636', 'image_name': '636'}, {'class_ids': [1], 'mask_name': '637', 'image_name': '637'}, {'class_ids': [1], 'mask_name': '638', 'image_name': '638'}, {'class_ids': [1], 'mask_name': '639', 'image_name': '639'}, {'class_ids': [1], 'mask_name': '640', 'image_name': '640'}, {'class_ids': [1], 'mask_name': '641', 'image_name': '641'}, {'class_ids': [1], 'mask_name': '642', 'image_name': '642'}, {'class_ids': [1], 'mask_name': '643', 'image_name': '643'}, {'class_ids': [1], 'mask_name': '644', 'image_name': '644'}, {'class_ids': [1], 'mask_name': '645', 'image_name': '645'}, {'class_ids': [1], 'mask_name': '646', 'image_name': '646'}, {'class_ids': [1], 'mask_name': '647', 'image_name': '647'}, {'class_ids': [1], 'mask_name': '648', 'image_name': '648'}, {'class_ids': [1], 'mask_name': '649', 'image_name': '649'}, {'class_ids': [1], 'mask_name': '650', 'image_name': '650'}, {'class_ids': [1], 'mask_name': '651', 'image_name': '651'}, {'class_ids': [1], 'mask_name': '652', 'image_name': '652'}, {'class_ids': [1], 'mask_name': '653', 'image_name': '653'}, {'class_ids': [1], 'mask_name': '654', 'image_name': '654'}, {'class_ids': [1], 'mask_name': '655', 'image_name': '655'}, {'class_ids': [1], 'mask_name': '656', 'image_name': '656'}, {'class_ids': [1], 'mask_name': '657', 'image_name': '657'}, {'class_ids': [1], 'mask_name': '658', 'image_name': '658'}, {'class_ids': [1], 'mask_name': '659', 'image_name': '659'}, {'class_ids': [1], 'mask_name': '660', 'image_name': '660'}, {'class_ids': [1], 'mask_name': '661', 'image_name': '661'}, {'class_ids': [1], 'mask_name': '662', 'image_name': '662'}, {'class_ids': [1], 'mask_name': '663', 'image_name': '663'}, {'class_ids': [1], 'mask_name': '664', 'image_name': '664'}, {'class_ids': [1], 'mask_name': '665', 'image_name': '665'}, {'class_ids': [1], 'mask_name': '666', 'image_name': '666'}, {'class_ids': [1], 'mask_name': '667', 'image_name': '667'}, {'class_ids': [1], 'mask_name': '668', 'image_name': '668'}, {'class_ids': [1], 'mask_name': '669', 'image_name': '669'}, {'class_ids': [1], 'mask_name': '670', 'image_name': '670'}, {'class_ids': [1], 'mask_name': '671', 'image_name': '671'}, {'class_ids': [1], 'mask_name': '672', 'image_name': '672'}, {'class_ids': [1], 'mask_name': '673', 'image_name': '673'}, {'class_ids': [1], 'mask_name': '674', 'image_name': '674'}, {'class_ids': [1], 'mask_name': '675', 'image_name': '675'}, {'class_ids': [1], 'mask_name': '676', 'image_name': '676'}, {'class_ids': [1], 'mask_name': '677', 'image_name': '677'}, {'class_ids': [1], 'mask_name': '678', 'image_name': '678'}, {'class_/usr/local/lib/python2.7/dist-packages/skimage/transform/_warps.py:84: UserWarning: The default mode, 'constant', will be changed to 'reflect' in skimage 0.15.
+  warn("The default mode, 'constant', will be changed to 'reflect' in "
+ids': [1], 'mask_name': '679', 'image_name': '679'}, {'class_ids': [1], 'mask_name': '680', 'image_name': '680'}, {'class_ids': [1], 'mask_name': '681', 'image_name': '681'}, {'class_ids': [1], 'mask_name': '682', 'image_name': '682'}, {'class_ids': [1], 'mask_name': '683', 'image_name': '683'}, {'class_ids': [1], 'mask_name': '684', 'image_name': '684'}, {'class_ids': [1], 'mask_name': '685', 'image_name': '685'}, {'class_ids': [1], 'mask_name': '686', 'image_name': '686'}, {'class_ids': [1], 'mask_name': '687', 'image_name': '687'}, {'class_ids': [1], 'mask_name': '688', 'image_name': '688'}, {'class_ids': [1], 'mask_name': '689', 'image_name': '689'}, {'class_ids': [1], 'mask_name': '690', 'image_name': '690'}, {'class_ids': [1], 'mask_name': '691', 'image_name': '691'}, {'class_ids': [1], 'mask_name': '692', 'image_name': '692'}, {'class_ids': [1], 'mask_name': '693', 'image_name': '693'}, {'class_ids': [1], 'mask_name': '694', 'image_name': '694'}, {'class_ids': [1], 'mask_name': '695', 'image_name': '695'}, {'class_ids': [1], 'mask_name': '696', 'image_name': '696'}, {'class_ids': [1], 'mask_name': '697', 'image_name': '697'}, {'class_ids': [1], 'mask_name': '698', 'image_name': '698'}, {'class_ids': [1], 'mask_name': '699', 'image_name': '699'}, {'class_ids': [1], 'mask_name': '700', 'image_name': '700'}, {'class_ids': [1], 'mask_name': '701', 'image_name': '701'}, {'class_ids': [1], 'mask_name': '702', 'image_name': '702'}, {'class_ids': [1], 'mask_name': '703', 'image_name': '703'}, {'class_ids': [1], 'mask_name': '704', 'image_name': '704'}, {'class_ids': [1], 'mask_name': '705', 'image_name': '705'}, {'class_ids': [1], 'mask_name': '706', 'image_name': '706'}, {'class_ids': [1], 'mask_name': '707', 'image_name': '707'}, {'class_ids': [1], 'mask_name': '708', 'image_name': '708'}, {'class_ids': [1], 'mask_name': '709', 'image_name': '709'}, {'class_ids': [1], 'mask_name': '710', 'image_name': '710'}, {'class_ids': [1], 'mask_name': '711', 'image_name': '711'}, {'class_ids': [1], 'mask_name': '712', 'image_name': '712'}, {'class_ids': [1], 'mask_name': '713', 'image_name': '713'}, {'class_ids': [1], 'mask_name': '714', 'image_name': '714'}, {'class_ids': [1], 'mask_name': '715', 'image_name': '715'}, {'class_ids': [1], 'mask_name': '716', 'image_name': '716'}, {'class_ids': [1], 'mask_name': '717', 'image_name': '717'}, {'class_ids': [1], 'mask_name': '718', 'image_name': '718'}, {'class_ids': [1], 'mask_name': '719', 'image_name': '719'}, {'class_ids': [1], 'mask_name': '720', 'image_name': '720'}]
+[94mTotal of 721 db items loaded![0m
+[94mTotal of 1 classes![0m
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+************************Looping************************************
+I0806 20:09:48.492336 31014 net.cpp:122] Setting up first_img
+I0806 20:09:48.492439 31014 net.cpp:129] Top shape: 1 3 224 224 (150528)
+I0806 20:09:48.492453 31014 net.cpp:129] Top shape: 1 3 224 224 (150528)
+I0806 20:09:48.492468 31014 net.cpp:129] Top shape: 1 1 224 224 (50176)
+I0806 20:09:48.492480 31014 net.cpp:129] Top shape: 1 1 224 224 (50176)
+I0806 20:09:48.492491 31014 net.cpp:137] Memory required for data: 1605632
+I0806 20:09:48.492516 31014 layer_factory.hpp:77] Creating layer second_img_first_img_1_split
+I0806 20:09:48.492570 31014 net.cpp:84] Creating Layer second_img_first_img_1_split
+I0806 20:09:48.492586 31014 net.cpp:406] second_img_first_img_1_split <- second_img
+I0806 20:09:48.492645 31014 net.cpp:380] second_img_first_img_1_split -> second_img_first_img_1_split_0
+I0806 20:09:48.492700 31014 net.cpp:380] second_img_first_img_1_split -> second_img_first_img_1_split_1
+I0806 20:09:48.492727 31014 net.cpp:380] second_img_first_img_1_split -> second_img_first_img_1_split_2
+I0806 20:09:48.492769 31014 net.cpp:122] Setting up second_img_first_img_1_split
+I0806 20:09:48.492784 31014 net.cpp:129] Top shape: 1 3 224 224 (150528)
+I0806 20:09:48.492794 31014 net.cpp:129] Top shape: 1 3 224 224 (150528)
+I0806 20:09:48.492805 31014 net.cpp:129] Top shape: 1 3 224 224 (150528)
+I0806 20:09:48.492815 31014 net.cpp:137] Memory required for data: 3411968
+I0806 20:09:48.492825 31014 layer_factory.hpp:77] Creating layer tiled_first_label
+I0806 20:09:48.492839 31014 net.cpp:84] Creating Layer tiled_first_label
+I0806 20:09:48.492849 31014 net.cpp:406] tiled_first_label <- first_label
+I0806 20:09:48.492877 31014 net.cpp:380] tiled_first_label -> tiled_first_label
+I0806 20:09:48.492914 31014 net.cpp:122] Setting up tiled_first_label
+I0806 20:09:48.492925 31014 net.cpp:129] Top shape: 1 3 224 224 (150528)
+I0806 20:09:48.492934 31014 net.cpp:137] Memory required for data: 4014080
+I0806 20:09:48.492944 31014 layer_factory.hpp:77] Creating layer first_input
+I0806 20:09:48.492969 31014 net.cpp:84] Creating Layer first_input
+I0806 20:09:48.492980 31014 net.cpp:406] first_input <- first_img
+I0806 20:09:48.492990 31014 net.cpp:406] first_input <- tiled_first_label
+I0806 20:09:48.493013 31014 net.cpp:380] first_input -> first_input
+I0806 20:09:48.493057 31014 net.cpp:122] Setting up first_input
+I0806 20:09:48.493074 31014 net.cpp:129] Top shape: 1 3 224 224 (150528)
+I0806 20:09:48.493084 31014 net.cpp:137] Memory required for data: 4616192
+I0806 20:09:48.493098 31014 layer_factory.hpp:77] Creating layer conv1_1f
+I0806 20:09:48.493136 31014 net.cpp:84] Creating Layer conv1_1f
+I0806 20:09:48.493191 31014 net.cpp:406] conv1_1f <- first_input
+I0806 20:09:48.493216 31014 net.cpp:380] conv1_1f -> conv1_1f
+F0806 20:09:48.518831 31014 cudnn_conv_layer.cpp:52] Check failed: error == cudaSuccess (2 vs. 0)  out of memory
+*** Check failure stack trace: ***
+    @     0x7ff106c4c5cd  google::LogMessage::Fail()
+    @     0x7ff106c4e433  google::LogMessage::SendToLog()
+    @     0x7ff106c4c15b  google::LogMessage::Flush()
+    @     0x7ff106c4ee1e  google::LogMessageFatal::~LogMessageFatal()
+    @     0x7ff10728dfab  caffe::CuDNNConvolutionLayer<>::LayerSetUp()
+    @     0x7ff1071ef66c  caffe::Net<>::Init()
+    @     0x7ff1071f1d5e  caffe::Net<>::Net()
+    @     0x7ff1071d0c45  caffe::Solver<>::InitTrainNet()
+    @     0x7ff1071d20b5  caffe::Solver<>::Init()
+    @     0x7ff1071d23cf  caffe::Solver<>::Solver()
+    @     0x7ff1071b5d51  caffe::Creator_SGDSolver<>()
+    @           0x416dac  caffe::SolverRegistry<>::CreateSolver()
+    @           0x40e67d  train()
+    @           0x40b8a3  main
+    @     0x7ff105938830  __libc_start_main
+    @           0x40c249  _start
+    @              (nil)  (unknown)
